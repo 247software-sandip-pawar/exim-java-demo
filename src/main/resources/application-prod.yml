@@ -1,0 +1,9 @@
+# Production: every value comes from environment variables.
+# Point DB_URL at any managed PostgreSQL (Neon, AWS RDS, Cloud SQL, ...).
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: false

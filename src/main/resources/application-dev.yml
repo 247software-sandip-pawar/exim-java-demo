@@ -1,0 +1,8 @@
+# Local development: points at the Docker Postgres from docker-compose.yml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/exim
+    username: postgres
+    password: dev
+  jpa:
+    show-sql: true
