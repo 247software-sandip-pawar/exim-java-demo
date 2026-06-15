@@ -1,17 +1,24 @@
 # Local development infrastructure: PostgreSQL (primary DB) + Redis (cache, used from Phase 4).
 # Start with:  docker compose up -d
+#
+# NOTE: This stack is OPTIONAL — if you already run PostgreSQL locally (e.g. via pgAdmin),
+# just create the per-module databases with db/bootstrap/create-databases.sql and skip Docker.
+#
+# When this container first initializes an empty data volume, it runs every script in
+# /docker-entrypoint-initdb.d, so the per-module databases are created automatically.
 services:
   postgres:
     image: postgres:17
     container_name: exim-postgres
     environment:
-      POSTGRES_DB: exim
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: dev
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
       - exim-pg-data:/var/lib/postgresql/data
+      - ./src/main/resources/db/bootstrap/create-databases.sql:/docker-entrypoint-initdb.d/01-create-databases.sql:ro
 
   redis:
     image: redis:7

@@ -1,9 +1,13 @@
-# Production: every value comes from environment variables.
-# Point DB_URL at any managed PostgreSQL (Neon, AWS RDS, Cloud SQL, ...).
+# Production — every value comes from environment variables.
+# Each module points at its own managed PostgreSQL database.
 spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
   jpa:
     show-sql: false
+
+app:
+  datasource:
+    identity:
+      url: ${IDENTITY_DB_URL}
+      username: ${IDENTITY_DB_USER}
+      password: ${IDENTITY_DB_PASSWORD}
+      driver-class-name: org.postgresql.Driver
