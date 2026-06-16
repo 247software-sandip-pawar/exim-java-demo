@@ -20,10 +20,12 @@
 -- Phase 1 — identity module (companies, users, auth)
 CREATE DATABASE exim_identity;
 
+-- Phase 2 — verification module (KYC documents)
+CREATE DATABASE exim_verification;
+
 -- ---------------------------------------------------------------------------
 -- Future modules (uncomment as each phase is built — one DB per module):
 -- ---------------------------------------------------------------------------
--- CREATE DATABASE exim_verification;   -- Phase 2: KYC
 -- CREATE DATABASE exim_catalog;        -- Phase 3: products, HS codes
 -- CREATE DATABASE exim_sourcing;       -- Phase 3: RFQs
 -- CREATE DATABASE exim_quotation;      -- Phase 4

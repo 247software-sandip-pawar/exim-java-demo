@@ -1,14 +1,17 @@
 /**
- * Verification module - company KYC (IEC / GST / RCMC document checks).
+ * Verification module - company KYC (IEC / GST / RCMC / BANK document checks).
  *
- * Planned entities:   Verification
- * Planned endpoints:  POST/GET /api/v1/companies/{id}/verifications
+ * IMPLEMENTED (Phase 2), backed by its own database {@code exim_verification}:
+ *   verification/domain      Verification entity + VerificationType/VerificationStatus enums
+ *   verification/repository  VerificationRepository
+ *   verification/service     VerificationService (@Transactional on verificationTransactionManager)
+ *   verification/controller  VerificationController
+ *   verification/dto         VerificationRequest / VerificationResponse
  *
- * Layered structure to implement (mirror the fully-built 'identity' module):
- *   verification/domain      JPA entities + enums
- *   verification/repository  Spring Data JPA repositories
- *   verification/service     business logic, @Transactional
- *   verification/controller  REST controllers
- *   verification/dto         request/response objects
+ * Endpoints: POST/GET /api/v1/companies/{companyId}/verifications,
+ *            GET /api/v1/companies/{companyId}/verifications/{verificationId}
+ *
+ * Deferred: real file upload (a StorageService abstraction — today the client supplies a fileUrl),
+ * and admin approve/reject of submissions (Phase 6).
  */
 package com.eximplatform.verification;

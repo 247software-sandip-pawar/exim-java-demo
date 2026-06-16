@@ -18,6 +18,13 @@ app:
       password: postgres
       driver-class-name: org.postgresql.Driver
 
+    # Phase 2 — verification module (KYC)
+    verification:
+      url: jdbc:postgresql://localhost:5432/exim_verification
+      username: postgres
+      password: postgres
+      driver-class-name: org.postgresql.Driver
+
     # As each module is built, add its own block here, e.g.:
     # catalog:
     #   url: jdbc:postgresql://localhost:5432/exim_catalog
