@@ -1,0 +1,11 @@
+spring:
+  jpa:
+    show-sql: true
+
+app:
+  datasource:
+    verification:
+      url: jdbc:postgresql://localhost:5432/exim_verification
+      username: postgres
+      password: postgres
+      driver-class-name: org.postgresql.Driver

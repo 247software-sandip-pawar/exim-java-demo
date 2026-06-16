@@ -1,0 +1,11 @@
+spring:
+  jpa:
+    show-sql: false
+
+app:
+  datasource:
+    identity:
+      url: ${IDENTITY_DB_URL}
+      username: ${IDENTITY_DB_USER}
+      password: ${IDENTITY_DB_PASSWORD}
+      driver-class-name: org.postgresql.Driver
