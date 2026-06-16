@@ -23,6 +23,8 @@
         <module>libs/security</module>
         <module>services/identity-service</module>
         <module>services/verification-service</module>
+        <module>services/catalog-service</module>
+        <module>services/sourcing-service</module>
     </modules>
 
     <properties>

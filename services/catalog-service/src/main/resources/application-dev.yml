@@ -1,0 +1,11 @@
+spring:
+  jpa:
+    show-sql: true
+
+app:
+  datasource:
+    catalog:
+      url: jdbc:postgresql://localhost:5432/exim_catalog
+      username: postgres
+      password: postgres
+      driver-class-name: org.postgresql.Driver
