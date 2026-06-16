@@ -9,6 +9,7 @@ import com.eximplatform.identity.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    /** Any authenticated user can read their own profile. */
     @GetMapping("/me")
     public ApiResponse<UserResponse> me(Authentication authentication) {
         return ApiResponse.ok(userService.getProfileByEmail(authentication.getName()));
@@ -39,21 +41,25 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ApiResponse<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
         return ApiResponse.ok(userService.create(request));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'SUPPORT')")
     public ApiResponse<UserResponse> get(@PathVariable UUID id) {
         return ApiResponse.ok(userService.get(id));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'SUPPORT')")
     public ApiResponse<PageResponse<UserResponse>> list(Pageable pageable) {
         return ApiResponse.ok(userService.list(pageable));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ApiResponse<UserResponse> update(@PathVariable UUID id,
                                             @Valid @RequestBody UpdateUserRequest request) {
         return ApiResponse.ok(userService.update(id, request));
@@ -61,6 +67,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public void delete(@PathVariable UUID id) {
         userService.delete(id);
     }
