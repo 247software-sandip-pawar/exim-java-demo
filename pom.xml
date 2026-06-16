@@ -25,6 +25,7 @@
         <module>services/verification-service</module>
         <module>services/catalog-service</module>
         <module>services/sourcing-service</module>
+        <module>gateway</module>
     </modules>
 
     <properties>

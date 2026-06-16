@@ -23,11 +23,13 @@ CREATE DATABASE exim_identity;
 -- Phase 2 — verification module (KYC documents)
 CREATE DATABASE exim_verification;
 
+-- Phase 3 — discovery modules
+CREATE DATABASE exim_catalog;          -- products, HS codes
+CREATE DATABASE exim_sourcing;         -- RFQs
+
 -- ---------------------------------------------------------------------------
 -- Future modules (uncomment as each phase is built — one DB per module):
 -- ---------------------------------------------------------------------------
--- CREATE DATABASE exim_catalog;        -- Phase 3: products, HS codes
--- CREATE DATABASE exim_sourcing;       -- Phase 3: RFQs
 -- CREATE DATABASE exim_quotation;      -- Phase 4
 -- CREATE DATABASE exim_messaging;      -- Phase 4
 -- CREATE DATABASE exim_orders;         -- Phase 4

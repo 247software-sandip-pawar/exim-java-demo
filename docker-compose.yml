@@ -1,8 +1,12 @@
-# Local development infrastructure: PostgreSQL (primary DB) + Redis (cache, used from Phase 4).
+# Local development infrastructure: PostgreSQL (one DB per service) + Redis (used from Phase 4).
 # Start with:  docker compose up -d
 #
+# This provisions only the backing infrastructure. Run the services themselves with
+# `mvn spring-boot:run` per module (gateway :8080, identity :8081, verification :8082,
+# catalog :8083, sourcing :8084), or build images per service later.
+#
 # NOTE: This stack is OPTIONAL — if you already run PostgreSQL locally (e.g. via pgAdmin),
-# just create the per-module databases with db/bootstrap/create-databases.sql and skip Docker.
+# just create the per-service databases with infra/db/create-databases.sql and skip Docker.
 #
 # When this container first initializes an empty data volume, it runs every script in
 # /docker-entrypoint-initdb.d, so the per-module databases are created automatically.
@@ -18,7 +22,7 @@ services:
       - "5432:5432"
     volumes:
       - exim-pg-data:/var/lib/postgresql/data
-      - ./src/main/resources/db/bootstrap/create-databases.sql:/docker-entrypoint-initdb.d/01-create-databases.sql:ro
+      - ./infra/db/create-databases.sql:/docker-entrypoint-initdb.d/01-create-databases.sql:ro
 
   redis:
     image: redis:7
