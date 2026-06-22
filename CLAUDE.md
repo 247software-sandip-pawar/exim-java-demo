@@ -5,16 +5,19 @@ Guidance for working in this repository. Read this first.
 ## What this is
 EXIM Marketplace: an export-import B2B platform built as **module-wise microservices** in a Maven
 multi-module monorepo. Each business module is an independently deployable Spring Boot service that
-**owns its own PostgreSQL database**; services communicate over REST and sit behind one API gateway.
-Built phase-by-phase per `EXECUTION_PLAN.md`.
+**owns its own MongoDB database**; services communicate over REST and sit behind one API gateway.
+Built phase-by-phase per `EXECUTION_PLAN.md`. Persistence is **Spring Data MongoDB**; the target
+store is **MongoDB Atlas** (one cluster, one database per service), see `MONGODB_SETUP.md`.
 
 ## Topology
 ```
 client → gateway(:8080) → identity(:8081) | verification(:8082) | catalog(:8083) | sourcing(:8084)
                           exim_identity      exim_verification     exim_catalog      exim_sourcing
 ```
+  exim_identity      exim_verification     exim_catalog      exim_sourcing  (MongoDB databases)
 - identity issues JWTs (register/login); **every service validates JWTs independently** with the
-  same `JWT_SECRET`. No shared session, no shared database.
+  same `JWT_SECRET`. No shared session, no shared database. All services share one `MONGODB_URI`
+  (the cluster) but each writes to its own database via `spring.data.mongodb.database`.
 - Cross-module data is fetched over REST, never by touching another service's DB. Clients live in
   `libs/common/.../client`: `IdentityClient.companyExists(id)`, `CatalogClient.findProductsByHsCode(code)`.
   Both forward the caller's `Authorization` header.
@@ -27,25 +30,35 @@ libs/
                              OpenApiConfig, client/{IdentityClient,CatalogClient,ProductMatch}
   security/                  JwtService, JwtAuthenticationFilter, SecurityConfig (shared, property-driven)
 services/<name>-service/     a Spring Boot app: domain → repository → service → controller → dto,
-                             plus config/datasource/<Name>DataSourceConfig + resources/db/migration/<name>
+                             plus config/<Name>MongoConfig (repositories + auditing + tx manager)
 gateway/                     Spring Cloud Gateway (servlet/webmvc); routes only, no auth
-infra/db/create-databases.sql  one CREATE DATABASE per service
+docker-compose.yml           optional local MongoDB (single-node replica set) + Redis
 ```
+MongoDB auto-creates databases/collections on first write, so there is no `create-databases.sql`
+and no schema migration step. Reference/seed data is inserted on startup by a `CommandLineRunner`
+(e.g. catalog's `HsCodeSeeder`).
 
 ## Conventions (follow these — several are easy to get wrong)
 - **Package root is always `com.eximplatform`.** Each service's `@SpringBootApplication` sets
   `scanBasePackages = "com.eximplatform"` so the shared `common`/`security` beans on the classpath
   get component-scanned. Keep package names identical across modules (no per-service prefixes).
-- **`@Transactional` MUST name the service's transaction manager**, e.g.
-  `@Transactional(transactionManager = "catalogTransactionManager")`. There is no `@Primary` tx
-  manager in standalone services; an unqualified `@Transactional` will resolve wrong/fail.
-- **Schema is owned by Flyway, validated by Hibernate.** Each `*DataSourceConfig` runs Flyway
-  (`classpath:db/migration/<module>`) and sets `hibernate.hbm2ddl.auto=validate`. Write the
-  migration first; entity columns must match it (camelCase → snake_case naming strategy).
-- **Entities** extend `common.domain.BaseEntity` (UUID id, `@Version`, `created_at`/`updated_at`).
-  Enums are persisted `@Enumerated(EnumType.STRING)`.
-- **Never return JPA entities from services.** Map to DTOs *inside* the transaction (`open-in-view`
-  is false). DTOs use a static `from(entity)` factory.
+- **`@Transactional` names the service's transaction manager** (a `MongoTransactionManager`), e.g.
+  `@Transactional(transactionManager = "catalogTransactionManager")`, declared in each
+  `*MongoConfig`. identity-service uses a plain `@Transactional` (single tx manager bean → resolves
+  unambiguously). Mongo multi-doc transactions require a **replica set** (Atlas is one; the local
+  docker-compose Mongo runs as a single-node replica set for this reason).
+- **No schema, no migrations.** Collections are schemaless; `spring.data.mongodb.auto-index-creation`
+  builds indexes from `@Indexed`/`@Indexed(unique=true)` annotations on startup. Seed reference data
+  with a `CommandLineRunner` (insert-if-empty), not a migration.
+- **No dirty-checking (IMPORTANT).** MongoDB has no JPA-style flush-on-commit. An `update()` that
+  mutates a loaded document MUST call `repository.save(...)` explicitly, or the change is lost.
+- **Entities** are `@Document(collection="...")` and extend `common.domain.BaseEntity`
+  (app-assigned `UUID id`, **nullable `Long` `@Version`** — a primitive `long` defaulting to 0 is
+  misread as "new" on every save — and `@CreatedDate`/`@LastModifiedDate`, enabled by
+  `@EnableMongoAuditing`). Enums persist as their `String` name by default. Cross-collection links
+  inside a service use `@DBRef` (e.g. `User.company`); links across services are a bare `UUID`.
+- **Never return documents from services.** Map to DTOs inside the service method. DTOs use a static
+  `from(entity)` factory.
 - **Responses** are always wrapped: `ApiResponse<T>` (`{success,data,error,timestamp}`); list
   endpoints wrap `PageResponse<T>`. Controllers return `ApiResponse.ok(...)`.
 - **Errors** are mapped centrally in `common.GlobalExceptionHandler`: `ApiException`/`BusinessException`
@@ -64,23 +77,27 @@ mvn -pl services/catalog-service test               # one module
 mvn -pl services/identity-service spring-boot:run   # run one service (dev profile by default)
 mvn -pl gateway spring-boot:run                     # run the gateway (needs the others up to proxy)
 ```
-- Tests are **Mockito service-layer unit tests, no DB** (so `mvn install` stays green without Postgres).
+- Tests are **Mockito service-layer unit tests, no DB** (so `mvn install` stays green without MongoDB).
   The gateway has a context-load `@SpringBootTest`. There are no Testcontainers integration tests yet.
-- To run the stack: `docker compose up -d` (Postgres with all DBs + Redis), then `spring-boot:run` each
-  service. All services must share the same `JWT_SECRET` (defaulted in dev).
+- To run the stack against **Atlas**: `export MONGODB_URI='mongodb+srv://<user>:<pass>@<cluster>/'`
+  (one secret, every service writes to its own database), then `spring-boot:run` each service.
+  To run **offline**: `docker compose up -d` (local single-node-replica-set Mongo + Redis) — the dev
+  default `MONGODB_URI` already points at it. All services must share the same `JWT_SECRET` and
+  `MONGODB_URI`. See `MONGODB_SETUP.md` for the Atlas account walkthrough.
 
 ## Adding a new service (e.g. `orders`)
-1. `infra/db/create-databases.sql`: add `CREATE DATABASE exim_orders;`
-2. New module under `services/orders-service` + add it to the parent `pom.xml` `<modules>`.
-3. Copy a `*DataSourceConfig` (e.g. catalog's), rename beans to `orders*`, point `@EnableJpaRepositories`
-   at `com.eximplatform.orders.repository` and Flyway at `db/migration/orders`.
-4. `OrdersServiceApplication` with `@SpringBootApplication(scanBasePackages = "com.eximplatform")`.
-5. Migration `V1__init_orders.sql` first, then domain → repository → dto → service
-   (`@Transactional(transactionManager="ordersTransactionManager")`) → controller (`@PreAuthorize`).
-6. `application.yml` (own port, `app.datasource.orders.*`, `JWT_SECRET`, any `app.clients.*` URLs) +
-   `application-dev.yml` / `application-prod.yml`.
-7. Add a route to `gateway/src/main/resources/application.yml` (order specific paths before general ones).
-8. Cross-module reads: add/extend a REST client in `libs/common` rather than depending on another
+1. New module under `services/orders-service` + add it to the parent `pom.xml` `<modules>`
+   (depend on `common` + `security`, and `spring-boot-starter-data-mongodb`).
+2. Copy a `*MongoConfig` (e.g. catalog's), rename the tx-manager bean to `ordersTransactionManager`,
+   point `@EnableMongoRepositories` at `com.eximplatform.orders.repository`.
+3. `OrdersServiceApplication` with `@SpringBootApplication(scanBasePackages = "com.eximplatform")`.
+4. domain (`@Document`, extend `BaseEntity`, `@Indexed` where needed) → repository (`MongoRepository`)
+   → dto → service (`@Transactional(transactionManager="ordersTransactionManager")`, **explicit
+   `save()` on updates**) → controller (`@PreAuthorize`). Seed reference data with a `CommandLineRunner`.
+5. `application.yml` (own port, `spring.data.mongodb.uri`=`${MONGODB_URI:...}` + `database: exim_orders`,
+   `JWT_SECRET`, any `app.clients.*` URLs) + `application-dev.yml` / `application-prod.yml`.
+6. Add a route to `gateway/src/main/resources/application.yml` (order specific paths before general ones).
+7. Cross-module reads: add/extend a REST client in `libs/common` rather than depending on another
    service's code or database.
 
 ## Gotchas
@@ -88,7 +105,10 @@ mvn -pl gateway spring-boot:run                     # run the gateway (needs the
 - **Gateway route order matters** (first match wins). `/api/v1/companies/*/verifications` must precede
   `/api/v1/companies/**`, or identity would swallow the verification sub-path.
 - **First gateway build needs network** to fetch Spring Cloud (`spring-cloud 2025.1`, gateway `5.0.0`);
-  other modules build from the cached Spring Boot 4.0 deps.
+  other modules build from the cached Spring Boot 4.0 deps (incl. the MongoDB driver/starter).
+- **Mongo transactions need a replica set.** A standalone `mongod` throws on `@Transactional` writes;
+  use Atlas (a replica set) or the single-node-replica-set `docker compose` Mongo. `directConnection=true`
+  in the dev URI lets the client talk to that single node without SRV discovery.
 - **JWT lifetime is 15 min**, no refresh token yet. Expired/invalid tokens are logged at DEBUG in
   `JwtAuthenticationFilter` and rejected with 403 by the protected routes.
 

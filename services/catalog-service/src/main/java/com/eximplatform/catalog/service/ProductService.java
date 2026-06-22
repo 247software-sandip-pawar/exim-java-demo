@@ -65,6 +65,8 @@ public class ProductService {
             p.setActive(req.getActive());
         }
         // companyId (ownership) is immutable on update.
+        // MongoDB has no dirty-checking; the mutated document must be saved explicitly.
+        productRepository.save(p);
         return ProductResponse.from(p);
     }
 

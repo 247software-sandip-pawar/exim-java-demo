@@ -1,28 +1,19 @@
 package com.eximplatform.identity.domain;
 
 import com.eximplatform.common.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "companies")
+@Document(collection = "companies")
 public class Company extends BaseEntity {
 
-    @Column(nullable = false)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
     private CompanyType type;
 
     private String country;
     private String iecCode;
     private String gstin;
 
-    @Column(nullable = false)
     private boolean verified = false;
 
     public String getName() { return name; }

@@ -1,9 +1,8 @@
 package com.eximplatform.catalog.domain;
 
 import com.eximplatform.common.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -12,35 +11,27 @@ import java.util.UUID;
  * A product listed by a seller company. {@code companyId} links to a company in the identity
  * service (validated over REST on create); {@code hsCode} links to an {@link HsCode} by its code.
  */
-@Entity
-@Table(name = "products")
+@Document(collection = "products")
 public class Product extends BaseEntity {
 
-    @Column(name = "company_id", nullable = false)
+    @Indexed
     private UUID companyId;
 
-    @Column(nullable = false)
     private String name;
 
-    @Column(length = 2000)
     private String description;
 
-    @Column(name = "hs_code", nullable = false, length = 20)
+    @Indexed
     private String hsCode;
 
-    @Column(name = "unit_price", nullable = false, precision = 18, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(nullable = false, length = 3)
     private String currency;
 
-    @Column(length = 20)
     private String unit;
 
-    @Column(name = "min_order_qty", nullable = false)
     private int minOrderQty = 1;
 
-    @Column(nullable = false)
     private boolean active = true;
 
     public UUID getCompanyId() { return companyId; }

@@ -77,6 +77,8 @@ public class UserService {
         user.setPhone(req.getPhone());
         user.setRole(req.getRole());
         user.setCompany(resolveCompany(req.getCompanyId()));
+        // MongoDB has no dirty-checking; the mutated document must be saved explicitly.
+        userRepository.save(user);
         return UserResponse.from(user);
     }
 

@@ -1,9 +1,9 @@
 package com.eximplatform.sourcing.repository;
 
 import com.eximplatform.sourcing.domain.Rfq;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.UUID;
 
-public interface RfqRepository extends JpaRepository<Rfq, UUID> {
+public interface RfqRepository extends MongoRepository<Rfq, UUID> {
 }

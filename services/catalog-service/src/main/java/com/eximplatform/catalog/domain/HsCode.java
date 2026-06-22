@@ -1,22 +1,19 @@
 package com.eximplatform.catalog.domain;
 
 import com.eximplatform.common.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Harmonized System code — the international tariff classification a product is listed under.
- * Reference data, seeded by migration.
+ * Reference data, seeded on startup by {@code HsCodeSeeder}.
  */
-@Entity
-@Table(name = "hs_codes")
+@Document(collection = "hs_codes")
 public class HsCode extends BaseEntity {
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Indexed(unique = true)
     private String code;
 
-    @Column(nullable = false)
     private String description;
 
     public String getCode() { return code; }

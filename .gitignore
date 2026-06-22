@@ -4,6 +4,8 @@ target/
 *.iml
 .vscode/
 .env
+set-env.sh
+logs/
 *.log
 HELP.md
 

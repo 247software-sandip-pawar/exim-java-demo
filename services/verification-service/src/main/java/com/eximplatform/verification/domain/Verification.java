@@ -1,11 +1,8 @@
 package com.eximplatform.verification.domain;
 
 import com.eximplatform.common.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.UUID;
 
@@ -13,25 +10,18 @@ import java.util.UUID;
  * A KYC document submitted by a company for verification. Owned by the verification module's
  * database; {@code companyId} links to a company in the identity module by id only (no FK).
  */
-@Entity
-@Table(name = "verifications")
+@Document(collection = "verifications")
 public class Verification extends BaseEntity {
 
-    @Column(name = "company_id", nullable = false)
+    @Indexed
     private UUID companyId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
     private VerificationType type;
 
-    @Column(name = "file_url", nullable = false, length = 1024)
     private String fileUrl;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
     private VerificationStatus status = VerificationStatus.PENDING;
 
-    @Column(name = "reviewer_note", length = 1024)
     private String reviewerNote;
 
     public UUID getCompanyId() { return companyId; }

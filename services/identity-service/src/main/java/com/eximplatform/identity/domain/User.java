@@ -1,36 +1,31 @@
 package com.eximplatform.identity.domain;
 
 import com.eximplatform.common.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "users")
+@Document(collection = "users")
 public class User extends BaseEntity {
 
-    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Indexed(unique = true)
     private String email;
 
-    @Column(nullable = false)
     private String passwordHash;
 
     private String phone;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
     private Role role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
+    /**
+     * Reference to the user's company (stored as a DBRef to the {@code companies} collection, the
+     * single source of truth). Resolved eagerly on load, so {@code getCompany().getName()} works in
+     * DTO mapping. Querying by the referenced id needs the explicit {@code @Query} in
+     * {@code UserRepository.existsByCompanyId}.
+     */
+    @DBRef
     private Company company;
 
     public String getName() { return name; }

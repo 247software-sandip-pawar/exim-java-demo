@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,6 +54,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.fail(new ApiError("METHOD_NOT_ALLOWED", ex.getMessage())));
+    }
+
+    /**
+     * The request body could not be parsed at all (malformed JSON, or a value that doesn't fit the
+     * target type — e.g. an unknown enum constant). That's a client error -> 400, not a 500. We don't
+     * echo the parser's message back, as it can leak type/field internals.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotReadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.fail(new ApiError("MALFORMED_REQUEST",
+                        "Request body is malformed or contains an invalid value.")));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

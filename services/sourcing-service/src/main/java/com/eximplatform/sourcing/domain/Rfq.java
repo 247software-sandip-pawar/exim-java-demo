@@ -1,11 +1,8 @@
 package com.eximplatform.sourcing.domain;
 
 import com.eximplatform.common.domain.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -14,36 +11,27 @@ import java.util.UUID;
  * A buyer's Request For Quotation. {@code buyerCompanyId} links to a company in the identity
  * service (validated over REST); {@code hsCode} is used to match against catalog products.
  */
-@Entity
-@Table(name = "rfqs")
+@Document(collection = "rfqs")
 public class Rfq extends BaseEntity {
 
-    @Column(name = "buyer_company_id", nullable = false)
+    @Indexed
     private UUID buyerCompanyId;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(length = 2000)
     private String description;
 
-    @Column(name = "hs_code", nullable = false, length = 20)
+    @Indexed
     private String hsCode;
 
-    @Column(nullable = false)
     private int quantity;
 
-    @Column(length = 20)
     private String unit;
 
-    @Column(name = "target_price", precision = 18, scale = 2)
     private BigDecimal targetPrice;
 
-    @Column(length = 3)
     private String currency;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
     private RfqStatus status = RfqStatus.OPEN;
 
     public UUID getBuyerCompanyId() { return buyerCompanyId; }

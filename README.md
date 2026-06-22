@@ -2,8 +2,8 @@
 
 Backend for an export-import B2B marketplace, built as **module-wise microservices** in a Maven
 multi-module monorepo. Each business module is an independently deployable Spring Boot service that
-owns its own PostgreSQL database; services talk to each other over REST and sit behind a single API
-gateway.
+owns its own MongoDB database; services talk to each other over REST and sit behind a single API
+gateway. The target store is **MongoDB Atlas** (free tier) — see [`MONGODB_SETUP.md`](MONGODB_SETUP.md).
 
 ## Architecture
 
@@ -32,8 +32,8 @@ gateway.
 
 ## Tech stack
 - Java 17, Spring Boot 4.0, Spring Cloud 2025.1 (Gateway)
-- Spring Web, Spring Data JPA, Spring Security (JWT), Bean Validation, Actuator
-- PostgreSQL + Flyway (per-service migrations), springdoc-openapi (Swagger UI per service), Maven
+- Spring Web, Spring Data MongoDB, Spring Security (JWT), Bean Validation, Actuator
+- MongoDB (Atlas free tier; one database per service), springdoc-openapi (Swagger UI per service), Maven
 
 ## Repository layout
 ```
@@ -47,18 +47,22 @@ services/
   catalog-service/     :8083  products, HS codes               (owns exim_catalog)
   sourcing-service/    :8084  RFQs + matching                  (owns exim_sourcing)
 gateway/               :8080  Spring Cloud Gateway (entry point)
-infra/db/                     create-databases.sql (one CREATE DATABASE per service)
+docker-compose.yml            optional local MongoDB (single-node replica set) + Redis
 ```
 
 Each service follows the same five-layer shape: `domain → repository → service → controller → dto`,
-plus a per-service `config/datasource` class wiring its own database + Flyway.
+plus a per-service `config/<Name>MongoConfig` class (repositories + auditing + transaction manager).
+MongoDB creates databases/collections on first write; reference data is seeded on startup.
 
 ## Run it locally
 
-1. **Databases.** Create one database per service (Phase 1–3 need identity, verification, catalog,
-   sourcing):
-   - Docker: `docker compose up -d` (the bootstrap script creates them on first start; also starts Redis).
-   - Or your own PostgreSQL: run `infra/db/create-databases.sql` against the `postgres` database.
+1. **MongoDB.** Use **Atlas** (recommended): create a free cluster and export its connection string —
+   full walkthrough in [`MONGODB_SETUP.md`](MONGODB_SETUP.md):
+   ```bash
+   export MONGODB_URI='mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/?retryWrites=true&w=majority'
+   ```
+   Or run it **offline** with `docker compose up -d` (local single-node-replica-set Mongo + Redis); the
+   dev profile already defaults `MONGODB_URI` to that local instance. Databases are created on first write.
 2. **Build everything:** `mvn clean install`
 3. **Run each service** (separate terminals; `dev` profile by default):
    ```bash
@@ -71,9 +75,9 @@ plus a per-service `config/datasource` class wiring its own database + Flyway.
 4. Everything is reachable through the gateway at **http://localhost:8080**. Each service also serves
    its own Swagger UI (e.g. http://localhost:8081/swagger-ui.html).
 
-> All services must share the same `JWT_SECRET` (defaulted for dev). In dev they default to
-> `localhost:5432`, user/password `postgres`/`postgres` — edit each service's `application-dev.yml`
-> if your local Postgres differs.
+> All services must share the same `JWT_SECRET` and `MONGODB_URI` (both defaulted for dev). Each
+> service writes to its own database (`exim_identity`, `exim_verification`, `exim_catalog`,
+> `exim_sourcing`), set via `spring.data.mongodb.database` in its `application.yml`.
 
 ## Try the API (through the gateway)
 ```bash
@@ -90,9 +94,9 @@ curl -s "http://localhost:8080/api/v1/rfqs/<rfqId>/matches" -H "Authorization: B
 ```
 
 ## Production
-Set `SPRING_PROFILES_ACTIVE=prod`, a shared `JWT_SECRET`, each service's `*_DB_*` env vars, and the
-inter-service base URLs (`IDENTITY_BASE_URL`, `CATALOG_BASE_URL`) / gateway route URIs. Each service's
-Flyway migrations recreate its schema on its own target database.
+Set `SPRING_PROFILES_ACTIVE=prod`, a shared `JWT_SECRET`, the shared `MONGODB_URI` (required, no
+localhost fallback in prod), and the inter-service base URLs (`IDENTITY_BASE_URL`, `CATALOG_BASE_URL`)
+/ gateway route URIs. Collections and indexes are created automatically on first use.
 
 ## Build a deployable jar (per service)
 ```bash

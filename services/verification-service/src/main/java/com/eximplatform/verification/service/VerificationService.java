@@ -17,8 +17,8 @@ import java.util.UUID;
 /**
  * KYC document submission and lookup for a company.
  *
- * <p>Bound explicitly to {@code verificationTransactionManager} (consistent with the platform
- * datasource template).
+ * <p>Bound explicitly to {@code verificationTransactionManager} (the service's
+ * {@code MongoTransactionManager}, consistent with the platform convention).
  *
  * <p>Company existence is checked against the identity <em>service</em> over REST via
  * {@link IdentityClient} — verification owns no company data.

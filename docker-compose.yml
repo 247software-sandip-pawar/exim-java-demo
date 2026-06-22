@@ -1,28 +1,33 @@
-# Local development infrastructure: PostgreSQL (one DB per service) + Redis (used from Phase 4).
+# Local development infrastructure: MongoDB + Redis (Redis used from Phase 4).
 # Start with:  docker compose up -d
 #
 # This provisions only the backing infrastructure. Run the services themselves with
 # `mvn spring-boot:run` per module (gateway :8080, identity :8081, verification :8082,
 # catalog :8083, sourcing :8084), or build images per service later.
 #
-# NOTE: This stack is OPTIONAL — if you already run PostgreSQL locally (e.g. via pgAdmin),
-# just create the per-service databases with infra/db/create-databases.sql and skip Docker.
+# NOTE: This stack is OPTIONAL — the primary target is MongoDB Atlas (cloud free tier). Set
+# MONGODB_URI to your Atlas connection string and you can skip this file entirely. It exists so
+# the stack can also run fully offline.
 #
-# When this container first initializes an empty data volume, it runs every script in
-# /docker-entrypoint-initdb.d, so the per-module databases are created automatically.
+# MongoDB runs as a SINGLE-NODE REPLICA SET (--replSet rs0). A replica set is required for
+# multi-document transactions, which the services use via @Transactional. The healthcheck below
+# also performs the one-time rs.initiate() so no manual step is needed; each service connects with
+# MONGODB_URI=mongodb://localhost:27017/?directConnection=true (the dev default).
 services:
-  postgres:
-    image: postgres:17
-    container_name: exim-postgres
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  mongo:
+    image: mongo:7
+    container_name: exim-mongo
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
-      - "5432:5432"
+      - "27017:27017"
     volumes:
-      - exim-pg-data:/var/lib/postgresql/data
-      - ./infra/db/create-databases.sql:/docker-entrypoint-initdb.d/01-create-databases.sql:ro
+      - exim-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"try { rs.status().ok } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }\""]
+      interval: 10s
+      timeout: 10s
+      start_period: 20s
+      retries: 10
 
   redis:
     image: redis:7
@@ -31,4 +36,4 @@ services:
       - "6379:6379"
 
 volumes:
-  exim-pg-data:
+  exim-mongo-data:

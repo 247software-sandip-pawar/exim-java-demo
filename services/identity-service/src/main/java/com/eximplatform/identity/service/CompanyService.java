@@ -62,6 +62,8 @@ public class CompanyService {
         if (req.getVerified() != null) {
             company.setVerified(req.getVerified());
         }
+        // MongoDB has no dirty-checking; the mutated document must be saved explicitly.
+        companyRepository.save(company);
         return CompanyResponse.from(company);
     }
 

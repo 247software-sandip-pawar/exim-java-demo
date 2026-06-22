@@ -1,11 +1,4 @@
+# Prod profile: MONGODB_URI is required (no localhost fallback).
 spring:
-  jpa:
-    show-sql: false
-
-app:
-  datasource:
-    sourcing:
-      url: ${SOURCING_DB_URL}
-      username: ${SOURCING_DB_USER}
-      password: ${SOURCING_DB_PASSWORD}
-      driver-class-name: org.postgresql.Driver
+  mongodb:
+    uri: ${MONGODB_URI}

@@ -1,11 +1,5 @@
-spring:
-  jpa:
-    show-sql: true
-
-app:
-  datasource:
-    identity:
-      url: jdbc:postgresql://localhost:5432/exim_identity
-      username: postgres
-      password: postgres
-      driver-class-name: org.postgresql.Driver
+# Dev profile: defaults in application.yml point MONGODB_URI at a local mongod
+# (mongodb://localhost:27017). Set MONGODB_URI to your Atlas connection string to use Atlas.
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
