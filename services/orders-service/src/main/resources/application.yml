@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: orders-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  # MongoDB connection. In Spring Boot 4 the connection lives under spring.mongodb.*
+  # (spring.data.mongodb.* only holds Spring-Data settings like auto-index-creation).
+  # MONGODB_URI is the shared cluster connection string; this service writes to its OWN database.
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/?directConnection=true}
+    database: ${ORDERS_DB_NAME:exim_orders}
+    representation:
+      uuid: standard   # entities use UUID ids; without this the driver refuses to encode them
+  data:
+    mongodb:
+      auto-index-creation: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-to-a-long-random-secret-of-at-least-32-bytes-please}
+  clients:
+    quotation:
+      base-url: ${QUOTATION_BASE_URL:http://localhost:8085}
+
+# Atlas M0 (free tier) forbids the command Spring's Mongo health check runs against the
+# 'local' db, so disable it; the app's own database access is unaffected.
+management:
+  health:
+    mongo:
+      enabled: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: 8087

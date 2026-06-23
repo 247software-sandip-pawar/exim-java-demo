@@ -25,6 +25,10 @@
         <module>services/verification-service</module>
         <module>services/catalog-service</module>
         <module>services/sourcing-service</module>
+        <module>services/quotation-service</module>
+        <module>services/messaging-service</module>
+        <module>services/orders-service</module>
+        <module>services/documents-service</module>
         <module>gateway</module>
     </modules>
 

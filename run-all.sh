@@ -22,6 +22,10 @@ SERVICES=(
   "verification-service:8082"
   "catalog-service:8083"
   "sourcing-service:8084"
+  "quotation-service:8085"
+  "messaging-service:8086"
+  "orders-service:8087"
+  "documents-service:8088"
 )
 
 start() {  # start <jar> <name> <port>

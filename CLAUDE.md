@@ -12,22 +12,29 @@ store is **MongoDB Atlas** (one cluster, one database per service), see `MONGODB
 ## Topology
 ```
 client → gateway(:8080) → identity(:8081) | verification(:8082) | catalog(:8083) | sourcing(:8084)
-                          exim_identity      exim_verification     exim_catalog      exim_sourcing
+                          quotation(:8085) | messaging(:8086)    | orders(:8087)  | documents(:8088)
 ```
-  exim_identity      exim_verification     exim_catalog      exim_sourcing  (MongoDB databases)
+  exim_identity exim_verification exim_catalog exim_sourcing exim_quotation exim_messaging
+  exim_orders exim_documents  (one MongoDB database per service)
 - identity issues JWTs (register/login); **every service validates JWTs independently** with the
   same `JWT_SECRET`. No shared session, no shared database. All services share one `MONGODB_URI`
   (the cluster) but each writes to its own database via `spring.data.mongodb.database`.
 - Cross-module data is fetched over REST, never by touching another service's DB. Clients live in
-  `libs/common/.../client`: `IdentityClient.companyExists(id)`, `CatalogClient.findProductsByHsCode(code)`.
-  Both forward the caller's `Authorization` header.
+  `libs/common/.../client`: `IdentityClient.companyExists(id)`, `CatalogClient.findProductsByHsCode(code)`,
+  `QuotationClient.getQuote(id)` (orders builds an order from an accepted quote),
+  `OrdersClient.getOrder(id)` (documents generates a trade document for an order).
+  All forward the caller's `Authorization` header.
+- The deal flow (Phase 4): a seller submits a quote → buyer accepts → orders creates exactly one
+  order per accepted quote (idempotent on `quoteId`) → documents generates trade documents for the
+  order. Buyer/seller chat in `messaging` (conversations + messages, optional in-chat `Offer`).
 
 ## Repository layout
 ```
 pom.xml                      parent / aggregator (modules list + dependencyManagement; spring-cloud BOM)
 libs/
   common/                    ApiResponse/ApiError/PageResponse, BaseEntity, GlobalExceptionHandler,
-                             OpenApiConfig, client/{IdentityClient,CatalogClient,ProductMatch}
+                             OpenApiConfig, client/{IdentityClient,CatalogClient,QuotationClient,
+                             OrdersClient,ProductMatch,QuoteView,OrderView}
   security/                  JwtService, JwtAuthenticationFilter, SecurityConfig (shared, property-driven)
 services/<name>-service/     a Spring Boot app: domain → repository → service → controller → dto,
                              plus config/<Name>MongoConfig (repositories + auditing + tx manager)
@@ -113,8 +120,14 @@ mvn -pl gateway spring-boot:run                     # run the gateway (needs the
   `JwtAuthenticationFilter` and rejected with 403 by the protected routes.
 
 ## Status & deferred work
-- Implemented: Phase 1 identity, Phase 2 verification, Phase 3 catalog + sourcing.
+- Implemented: Phase 1 identity, Phase 2 verification, Phase 3 catalog + sourcing,
+  Phase 4 quotation + messaging + orders + documents.
 - Deferred (noted in code): refresh tokens; per-resource company-ownership checks (a COMPANY_ADMIN
   currently can act on any company id); real KYC file upload (today a `fileUrl` string, no StorageService);
-  async/event messaging; Testcontainers integration tests; per-service container images.
-- Next: Phase 4 (quotation, messaging, orders, documents) — see `EXECUTION_PLAN.md`.
+  Testcontainers integration tests; per-service container images. **Phase 4 infra is deliberately
+  deferred** (the modules are MongoDB + REST only): no RabbitMQ async document generation, no Redis,
+  no WebSocket `/ws` for real-time chat (messaging is plain REST), and documents records a `fileUrl`
+  placeholder rather than rendering a real PDF.
+- Next: Phase 5 (logistics + payments) — see `EXECUTION_PLAN.md`. Note that `EXECUTION_PLAN.md`
+  still describes the pre-migration JPA/Flyway/Postgres stack; the MongoDB conventions in this file
+  are authoritative.
