@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { ProtectedRoute } from "@/auth/RouteGuards";
+import { ProtectedRoute, RoleRoute } from "@/auth/RouteGuards";
 import { AppShell } from "@/components/app/AppShell";
 import { navItems } from "@/config/nav";
 
@@ -15,6 +15,9 @@ import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import DashboardHome from "@/pages/app/DashboardHome";
 import ComingSoon from "@/pages/app/ComingSoon";
+import Company from "@/pages/app/Company";
+import Users from "@/pages/app/admin/Users";
+import Companies from "@/pages/app/admin/Companies";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -62,6 +65,16 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<AppShell />}>
             <Route index element={<DashboardHome />} />
+
+            {/* Phase 1 — Identity */}
+            <Route path="company" element={<Company />} />
+            <Route element={<RoleRoute roles={["PLATFORM_ADMIN", "SUPPORT"]} />}>
+              <Route path="users" element={<Users />} />
+            </Route>
+            <Route element={<RoleRoute roles={["PLATFORM_ADMIN"]} />}>
+              <Route path="companies" element={<Companies />} />
+            </Route>
+
             {soonRoutes.map((r) => (
               <Route
                 key={r.path}

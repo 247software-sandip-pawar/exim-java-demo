@@ -55,13 +55,12 @@ export const navGroups = [
   {
     label: "Account",
     items: [
-      { to: "/app/company", label: "Company", icon: Building2, soon: true },
+      { to: "/app/company", label: "Company", icon: Building2 },
       {
         to: "/app/users",
         label: "Users",
         icon: Users,
         roles: ["PLATFORM_ADMIN", "SUPPORT"],
-        soon: true,
       },
     ],
   },
@@ -69,6 +68,7 @@ export const navGroups = [
     label: "Administration",
     roles: ["PLATFORM_ADMIN"],
     items: [
+      { to: "/app/companies", label: "Companies", icon: Building2 },
       {
         to: "/app/admin",
         label: "Admin console",

@@ -60,14 +60,13 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
-  const register = useCallback(
-    async (payload) => {
-      await api.post("/auth/register", payload);
-      // Register doesn't return a token in all cases — log in to obtain one.
-      return login(payload.email, payload.password);
-    },
-    [login]
-  );
+  const register = useCallback(async (payload) => {
+    // register returns the same AuthResponse { accessToken, user } as login.
+    const data = await api.post("/auth/register", payload);
+    setToken(data.accessToken);
+    setUser(data.user);
+    return data.user;
+  }, []);
 
   const hasRole = useCallback(
     (...roles) => (user ? roles.includes(user.role) : false),
