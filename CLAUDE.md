@@ -13,10 +13,12 @@ store is **MongoDB Atlas** (one cluster, one database per service), see `MONGODB
 ```
 client → gateway(:8080) → identity(:8081) | verification(:8082) | catalog(:8083) | sourcing(:8084)
                           quotation(:8085) | messaging(:8086)    | orders(:8087)  | documents(:8088)
-                          logistics(:8089) | payments(:8090)
+                          logistics(:8089) | payments(:8090)     | billing(:8091) | trust(:8092)
+                          notification(:8093) | admin(:8094)
 ```
   exim_identity exim_verification exim_catalog exim_sourcing exim_quotation exim_messaging
-  exim_orders exim_documents exim_logistics exim_payments  (one MongoDB database per service)
+  exim_orders exim_documents exim_logistics exim_payments exim_billing exim_trust
+  exim_notification exim_admin  (one MongoDB database per service)
 - identity issues JWTs (register/login); **every service validates JWTs independently** with the
   same `JWT_SECRET`. No shared session, no shared database. All services share one `MONGODB_URI`
   (the cluster) but each writes to its own database via `spring.data.mongodb.database`.
@@ -33,6 +35,12 @@ client → gateway(:8080) → identity(:8081) | verification(:8082) | catalog(:8
   (initiate→fund→release/refund, idempotent on `orderId`, amount snapshotted from the order via
   `OrdersClient`), plus letters of credit and seeded payment terms. Both reuse `OrdersClient`;
   logistics partners and payment terms are seeded reference data.
+- Revenue & operations (Phase 6): `billing` sells seeded `Plan`s as `Subscription`s (one ACTIVE per
+  company) with `PlatformPayment`s; `trust` records `Rating`s (+ per-company summary) and `Dispute`s
+  (state machine); `notification` stores in-app `Notification`s; `admin` (PLATFORM_ADMIN-only) screens
+  a seeded sanctions list, approves/rejects KYC by calling verification over REST via
+  `VerificationClient.decide(id, decision, note)` (verification exposes flat
+  `GET /api/v1/verifications/{id}` + `PATCH /{id}/decision`), and audit-logs every admin action.
 
 ## Repository layout
 ```
@@ -126,16 +134,22 @@ mvn -pl gateway spring-boot:run                     # run the gateway (needs the
   `JwtAuthenticationFilter` and rejected with 403 by the protected routes.
 
 ## Status & deferred work
-- Implemented: Phase 1 identity, Phase 2 verification, Phase 3 catalog + sourcing,
-  Phase 4 quotation + messaging + orders + documents, Phase 5 logistics + payments.
+- Implemented: **all six phases** — Phase 1 identity, Phase 2 verification, Phase 3 catalog +
+  sourcing, Phase 4 quotation + messaging + orders + documents, Phase 5 logistics + payments,
+  Phase 6 billing + trust + notification + admin. 14 business services + gateway + common/security
+  libs; ~82 service-layer unit tests; `mvn clean install` green with no external infra.
 - Deferred (noted in code): refresh tokens; per-resource company-ownership checks (a COMPANY_ADMIN
   currently can act on any company id); real KYC file upload (today a `fileUrl` string, no StorageService);
-  Testcontainers integration tests; per-service container images. **Phase 4/5 infra is deliberately
+  Testcontainers integration tests; per-service container images. **Phase 4–6 infra is deliberately
   deferred** (the modules are MongoDB + REST only): no RabbitMQ async document generation, no Redis,
   no WebSocket `/ws` for real-time chat (messaging is plain REST), documents records a `fileUrl`
   placeholder rather than rendering a real PDF, logistics records tracking events via its API rather
-  than a carrier feed, and payments models escrow/LC as a guarded state machine with an
-  `externalRef` placeholder (no licensed payment/escrow partner integration or signed webhooks).
-- Next: Phase 6 (billing + trust/ratings + notification + admin) — see `EXECUTION_PLAN.md`. Note that
+  than a carrier feed, payments models escrow/LC as a guarded state machine with an `externalRef`
+  placeholder (no licensed payment/escrow partner integration or signed webhooks), billing has no
+  real billing-provider charge integration, notification is in-app only (no FCM/email push), and
+  admin metrics are computed from admin-owned data (no live cross-service aggregation) against a
+  seeded demo sanctions list (no official OFAC/EU/UN feed).
+- Hardening backlog (post-feature): the deferred items above, plus observability
+  (Micrometer/Prometheus, tracing), rate limiting, CI/CD with per-service images, and load testing.
   `EXECUTION_PLAN.md` still describes the pre-migration JPA/Flyway/Postgres stack; the MongoDB
   conventions in this file are authoritative.

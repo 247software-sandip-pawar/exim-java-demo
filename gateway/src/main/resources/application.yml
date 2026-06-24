@@ -11,7 +11,7 @@ spring:
             - id: verification
               uri: ${VERIFICATION_URI:http://localhost:8082}
               predicates:
-                - Path=/api/v1/companies/*/verifications,/api/v1/companies/*/verifications/**
+                - Path=/api/v1/companies/*/verifications,/api/v1/companies/*/verifications/**,/api/v1/verifications/**
 
             # Identity: auth, users, companies.
             - id: identity
@@ -66,6 +66,30 @@ spring:
               uri: ${PAYMENTS_URI:http://localhost:8090}
               predicates:
                 - Path=/api/v1/payments/**,/api/v1/letters-of-credit/**,/api/v1/payment-terms/**
+
+            # Billing: plans, subscriptions, platform payments (the platform's revenue).
+            - id: billing
+              uri: ${BILLING_URI:http://localhost:8091}
+              predicates:
+                - Path=/api/v1/plans/**,/api/v1/subscriptions/**,/api/v1/platform-payments/**
+
+            # Trust: ratings and disputes.
+            - id: trust
+              uri: ${TRUST_URI:http://localhost:8092}
+              predicates:
+                - Path=/api/v1/ratings/**,/api/v1/disputes/**
+
+            # Notification: in-app notifications.
+            - id: notification
+              uri: ${NOTIFICATION_URI:http://localhost:8093}
+              predicates:
+                - Path=/api/v1/notifications/**
+
+            # Admin: KYC approval, sanctions screening, audit log, metrics.
+            - id: admin
+              uri: ${ADMIN_URI:http://localhost:8094}
+              predicates:
+                - Path=/api/v1/admin/**
 
 server:
   port: 8080

@@ -2,9 +2,11 @@ package com.eximplatform.verification.service;
 
 import com.eximplatform.common.api.PageResponse;
 import com.eximplatform.common.client.IdentityClient;
+import com.eximplatform.common.exception.BusinessException;
 import com.eximplatform.common.exception.NotFoundException;
 import com.eximplatform.verification.domain.Verification;
 import com.eximplatform.verification.domain.VerificationStatus;
+import com.eximplatform.verification.dto.VerificationDecisionRequest;
 import com.eximplatform.verification.dto.VerificationRequest;
 import com.eximplatform.verification.dto.VerificationResponse;
 import com.eximplatform.verification.repository.VerificationRepository;
@@ -58,6 +60,33 @@ public class VerificationService {
         return verificationRepository.findByIdAndCompanyId(verificationId, companyId)
                 .map(VerificationResponse::from)
                 .orElseThrow(() -> new NotFoundException("Verification not found."));
+    }
+
+    /** Look up a verification by id alone (used by the admin decision flow). */
+    @Transactional(transactionManager = "verificationTransactionManager", readOnly = true)
+    public VerificationResponse getById(UUID verificationId) {
+        return verificationRepository.findById(verificationId)
+                .map(VerificationResponse::from)
+                .orElseThrow(() -> new NotFoundException("Verification not found."));
+    }
+
+    /**
+     * Admin approves or rejects a submitted verification. Only a PENDING submission can be decided;
+     * the target must be APPROVED or REJECTED. MongoDB has no dirty-checking, so the change is saved.
+     */
+    public VerificationResponse decide(UUID verificationId, VerificationDecisionRequest req) {
+        if (req.getStatus() == VerificationStatus.PENDING) {
+            throw new BusinessException("INVALID_DECISION", "Decision must be APPROVED or REJECTED.");
+        }
+        Verification v = verificationRepository.findById(verificationId)
+                .orElseThrow(() -> new NotFoundException("Verification not found."));
+        if (v.getStatus() != VerificationStatus.PENDING) {
+            throw new BusinessException("ALREADY_DECIDED",
+                    "Verification is " + v.getStatus() + "; only a PENDING submission can be decided.");
+        }
+        v.setStatus(req.getStatus());
+        v.setReviewerNote(req.getReviewerNote());
+        return VerificationResponse.from(verificationRepository.save(v));
     }
 
     private void requireCompany(UUID companyId) {

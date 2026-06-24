@@ -31,6 +31,10 @@
         <module>services/documents-service</module>
         <module>services/logistics-service</module>
         <module>services/payments-service</module>
+        <module>services/billing-service</module>
+        <module>services/trust-service</module>
+        <module>services/notification-service</module>
+        <module>services/admin-service</module>
         <module>gateway</module>
     </modules>
 
