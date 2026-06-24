@@ -14,6 +14,7 @@ import {
   Building2,
   Users,
   ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 
 /**
@@ -56,6 +57,7 @@ export const navGroups = [
     label: "Account",
     items: [
       { to: "/app/company", label: "Company", icon: Building2 },
+      { to: "/app/verification", label: "Verification", icon: BadgeCheck },
       {
         to: "/app/users",
         label: "Users",

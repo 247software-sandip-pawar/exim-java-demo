@@ -11,6 +11,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: true, // bind all interfaces (IPv4 + IPv6) so 127.0.0.1/localhost both work
     open: true,
     proxy: {
       // Forward API calls to the Spring Cloud Gateway (avoids CORS in dev).

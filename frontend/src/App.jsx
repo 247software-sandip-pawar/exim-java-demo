@@ -16,6 +16,7 @@ import Register from "@/pages/auth/Register";
 import DashboardHome from "@/pages/app/DashboardHome";
 import ComingSoon from "@/pages/app/ComingSoon";
 import Company from "@/pages/app/Company";
+import Verification from "@/pages/app/Verification";
 import Users from "@/pages/app/admin/Users";
 import Companies from "@/pages/app/admin/Companies";
 
@@ -68,6 +69,8 @@ export default function App() {
 
             {/* Phase 1 — Identity */}
             <Route path="company" element={<Company />} />
+            {/* Phase 2 — Verification / KYC */}
+            <Route path="verification" element={<Verification />} />
             <Route element={<RoleRoute roles={["PLATFORM_ADMIN", "SUPPORT"]} />}>
               <Route path="users" element={<Users />} />
             </Route>

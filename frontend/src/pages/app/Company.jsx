@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Building2, BadgeCheck, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/auth/AuthContext";
 import { useApiQuery } from "@/hooks/useApi";
@@ -96,9 +97,11 @@ export default function Company() {
             </dl>
 
             {!company.verified && (
-              <div className="mt-6 rounded-lg border border-gold-400/40 bg-gold-400/10 px-4 py-3 text-sm text-navy-800">
-                Complete KYC verification to unlock trading. (Verification module ships in
-                Phase 2.)
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gold-400/40 bg-gold-400/10 px-4 py-3 text-sm text-navy-800">
+                <span>Complete KYC verification to unlock trading.</span>
+                <Link to="/app/verification" className="font-semibold text-primary hover:underline">
+                  Go to verification →
+                </Link>
               </div>
             )}
           </CardContent>

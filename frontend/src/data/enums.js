@@ -9,5 +9,15 @@ export const COMPANY_TYPES = [
   "FREIGHT_FORWARDER",
 ];
 
+// verification-service
+export const VERIFICATION_TYPES = ["IEC", "GST", "RCMC", "BANK"];
+export const VERIFICATION_TYPE_LABELS = {
+  IEC: "IEC — Import Export Code",
+  GST: "GST registration",
+  RCMC: "RCMC certificate",
+  BANK: "Bank document",
+};
+export const VERIFICATION_STATUSES = ["PENDING", "APPROVED", "REJECTED"];
+
 export const labelize = (v) =>
   v ? String(v).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "";

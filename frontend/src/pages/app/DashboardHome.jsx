@@ -64,7 +64,7 @@ export default function DashboardHome() {
             </div>
           </div>
           <Link
-            to="/app/company"
+            to="/app/verification"
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-navy-800"
           >
             Start verification <ArrowRight className="size-4" />
