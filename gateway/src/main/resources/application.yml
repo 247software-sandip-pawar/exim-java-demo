@@ -55,5 +55,17 @@ spring:
               predicates:
                 - Path=/api/v1/documents/**
 
+            # Logistics: shipments, tracking, and logistics partners.
+            - id: logistics
+              uri: ${LOGISTICS_URI:http://localhost:8089}
+              predicates:
+                - Path=/api/v1/shipments/**,/api/v1/logistics-partners/**
+
+            # Payments: escrow transactions, letters of credit, payment terms.
+            - id: payments
+              uri: ${PAYMENTS_URI:http://localhost:8090}
+              predicates:
+                - Path=/api/v1/payments/**,/api/v1/letters-of-credit/**,/api/v1/payment-terms/**
+
 server:
   port: 8080

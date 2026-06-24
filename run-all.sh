@@ -26,6 +26,8 @@ SERVICES=(
   "messaging-service:8086"
   "orders-service:8087"
   "documents-service:8088"
+  "logistics-service:8089"
+  "payments-service:8090"
 )
 
 start() {  # start <jar> <name> <port>

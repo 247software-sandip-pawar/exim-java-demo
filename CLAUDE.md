@@ -13,9 +13,10 @@ store is **MongoDB Atlas** (one cluster, one database per service), see `MONGODB
 ```
 client → gateway(:8080) → identity(:8081) | verification(:8082) | catalog(:8083) | sourcing(:8084)
                           quotation(:8085) | messaging(:8086)    | orders(:8087)  | documents(:8088)
+                          logistics(:8089) | payments(:8090)
 ```
   exim_identity exim_verification exim_catalog exim_sourcing exim_quotation exim_messaging
-  exim_orders exim_documents  (one MongoDB database per service)
+  exim_orders exim_documents exim_logistics exim_payments  (one MongoDB database per service)
 - identity issues JWTs (register/login); **every service validates JWTs independently** with the
   same `JWT_SECRET`. No shared session, no shared database. All services share one `MONGODB_URI`
   (the cluster) but each writes to its own database via `spring.data.mongodb.database`.
@@ -27,6 +28,11 @@ client → gateway(:8080) → identity(:8081) | verification(:8082) | catalog(:8
 - The deal flow (Phase 4): a seller submits a quote → buyer accepts → orders creates exactly one
   order per accepted quote (idempotent on `quoteId`) → documents generates trade documents for the
   order. Buyer/seller chat in `messaging` (conversations + messages, optional in-chat `Offer`).
+- Execution (Phase 5): `logistics` books a shipment for an order (reads it via `OrdersClient`) and
+  records tracking events along a status state machine; `payments` runs an escrow `Transaction`
+  (initiate→fund→release/refund, idempotent on `orderId`, amount snapshotted from the order via
+  `OrdersClient`), plus letters of credit and seeded payment terms. Both reuse `OrdersClient`;
+  logistics partners and payment terms are seeded reference data.
 
 ## Repository layout
 ```
@@ -121,13 +127,15 @@ mvn -pl gateway spring-boot:run                     # run the gateway (needs the
 
 ## Status & deferred work
 - Implemented: Phase 1 identity, Phase 2 verification, Phase 3 catalog + sourcing,
-  Phase 4 quotation + messaging + orders + documents.
+  Phase 4 quotation + messaging + orders + documents, Phase 5 logistics + payments.
 - Deferred (noted in code): refresh tokens; per-resource company-ownership checks (a COMPANY_ADMIN
   currently can act on any company id); real KYC file upload (today a `fileUrl` string, no StorageService);
-  Testcontainers integration tests; per-service container images. **Phase 4 infra is deliberately
+  Testcontainers integration tests; per-service container images. **Phase 4/5 infra is deliberately
   deferred** (the modules are MongoDB + REST only): no RabbitMQ async document generation, no Redis,
-  no WebSocket `/ws` for real-time chat (messaging is plain REST), and documents records a `fileUrl`
-  placeholder rather than rendering a real PDF.
-- Next: Phase 5 (logistics + payments) — see `EXECUTION_PLAN.md`. Note that `EXECUTION_PLAN.md`
-  still describes the pre-migration JPA/Flyway/Postgres stack; the MongoDB conventions in this file
-  are authoritative.
+  no WebSocket `/ws` for real-time chat (messaging is plain REST), documents records a `fileUrl`
+  placeholder rather than rendering a real PDF, logistics records tracking events via its API rather
+  than a carrier feed, and payments models escrow/LC as a guarded state machine with an
+  `externalRef` placeholder (no licensed payment/escrow partner integration or signed webhooks).
+- Next: Phase 6 (billing + trust/ratings + notification + admin) — see `EXECUTION_PLAN.md`. Note that
+  `EXECUTION_PLAN.md` still describes the pre-migration JPA/Flyway/Postgres stack; the MongoDB
+  conventions in this file are authoritative.

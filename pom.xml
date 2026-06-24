@@ -29,6 +29,8 @@
         <module>services/messaging-service</module>
         <module>services/orders-service</module>
         <module>services/documents-service</module>
+        <module>services/logistics-service</module>
+        <module>services/payments-service</module>
         <module>gateway</module>
     </modules>
 

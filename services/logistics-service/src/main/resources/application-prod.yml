@@ -1,0 +1,4 @@
+# Prod profile: MONGODB_URI is required (no localhost fallback).
+spring:
+  mongodb:
+    uri: ${MONGODB_URI}
