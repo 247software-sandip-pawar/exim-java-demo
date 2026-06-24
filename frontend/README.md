@@ -31,13 +31,33 @@ gateway (`:8080`) when wiring the live backend.
 ```
 src/
   components/
-    ui/         shadcn-style primitives (button, card, badge, accordion)
-    layout/     Navbar, Footer, Logo, PageHero, SectionHeading
-  pages/        Home, HowItWorks, Pricing, About, Contact
-  data/         content.js (mock copy + plans)
-  lib/utils.js  cn() class merger
+    ui/         shadcn-style primitives (button, card, badge, accordion,
+                input, label, dialog, dropdown-menu, spinner, skeleton)
+    layout/     Navbar, Footer, Logo, PageHero, SectionHeading (marketing)
+    app/        AppShell, Sidebar, Topbar, NotificationBell (authenticated shell)
+    common/     DataTable, FormField, PageHeader, StatusBadge, Pagination,
+                Loading/Error/Empty states (reused across all modules)
+  auth/         AuthContext (login/register/logout, JWT), RouteGuards
+  config/       nav.js (role-based sidebar nav, grouped by phase)
+  hooks/        useApi.js (useApiQuery / useApiMutation over React Query)
+  lib/          api.js (axios + interceptors + ApiResponse unwrap), queryClient.js
+  pages/
+    auth/       Login, Register, AuthLayout
+    app/        DashboardHome, ComingSoon (placeholder for upcoming modules)
+    (root)      Home, HowItWorks, Pricing, About, Contact (marketing)
+  data/         content.js (mock marketing copy + plans)
   index.css     design tokens (brand colors as HSL CSS vars)
 ```
+
+### Routes
+- Public: `/`, `/how-it-works`, `/pricing`, `/about`, `/contact`
+- Auth: `/login`, `/register`
+- App (protected): `/app` (dashboard) + module routes under `/app/*`
+
+### Phase 0 foundation (done)
+Auth context + JWT storage, axios client that unwraps `ApiResponse`/handles 401,
+React Query, role-aware app shell, and shared table/form/state components.
+Module screens are wired phase-by-phase per `UI_BUILD_PLAN.md`.
 
 See **DESIGN_GUIDELINES.md** for the full design system (color, type, spacing,
 components, a11y, page inventory).

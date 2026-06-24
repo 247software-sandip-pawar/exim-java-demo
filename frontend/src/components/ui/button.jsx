@@ -28,14 +28,21 @@ const buttonVariants = cva(
 );
 
 const Button = React.forwardRef(
-  ({ className, variant, size, asChild, ...props }, ref) => {
-    const Comp = asChild ? "span" : "button";
+  ({ className, variant, size, asChild, children, ...props }, ref) => {
+    const classes = cn(buttonVariants({ variant, size, className }));
+    // asChild: merge button styling onto the single child element (Slot pattern)
+    // so the whole control — not just the label — is the link/anchor.
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children, {
+        ref,
+        className: cn(classes, children.props.className),
+        ...props,
+      });
+    }
     return (
-      <Comp
-        ref={ref}
-        className={cn(buttonVariants({ variant, size, className }))}
-        {...props}
-      />
+      <button ref={ref} className={classes} {...props}>
+        {children}
+      </button>
     );
   }
 );

@@ -42,8 +42,12 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" size="sm">Sign in</Button>
-          <Button variant="accent" size="sm">Get started</Button>
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/login">Sign in</Link>
+          </Button>
+          <Button variant="accent" size="sm" asChild>
+            <Link to="/register">Get started</Link>
+          </Button>
         </div>
 
         <button
@@ -75,8 +79,12 @@ export function Navbar() {
               </NavLink>
             ))}
             <div className="mt-2 flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1">Sign in</Button>
-              <Button variant="accent" size="sm" className="flex-1">Get started</Button>
+              <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Link to="/login" onClick={() => setOpen(false)}>Sign in</Link>
+              </Button>
+              <Button variant="accent" size="sm" className="flex-1" asChild>
+                <Link to="/register" onClick={() => setOpen(false)}>Get started</Link>
+              </Button>
             </div>
           </nav>
         </div>
