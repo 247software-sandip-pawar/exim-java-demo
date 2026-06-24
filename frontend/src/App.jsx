@@ -24,6 +24,12 @@ import ProductDetail from "@/pages/app/catalog/ProductDetail";
 import HsCodes from "@/pages/app/catalog/HsCodes";
 import Rfqs from "@/pages/app/sourcing/Rfqs";
 import RfqDetail from "@/pages/app/sourcing/RfqDetail";
+import Quotes from "@/pages/app/quotes/Quotes";
+import QuoteDetail from "@/pages/app/quotes/QuoteDetail";
+import Orders from "@/pages/app/orders/Orders";
+import OrderDetail from "@/pages/app/orders/OrderDetail";
+import Messages from "@/pages/app/messages/Messages";
+import Documents from "@/pages/app/documents/Documents";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -83,6 +89,14 @@ export default function App() {
             <Route path="hs-codes" element={<HsCodes />} />
             <Route path="sourcing" element={<Rfqs />} />
             <Route path="sourcing/:rfqId" element={<RfqDetail />} />
+
+            {/* Phase 4 — Deal flow */}
+            <Route path="quotes" element={<Quotes />} />
+            <Route path="quotes/:quoteId" element={<QuoteDetail />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="orders/:orderId" element={<OrderDetail />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="documents" element={<Documents />} />
             <Route element={<RoleRoute roles={["PLATFORM_ADMIN", "SUPPORT"]} />}>
               <Route path="users" element={<Users />} />
             </Route>
