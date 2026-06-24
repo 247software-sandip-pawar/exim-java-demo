@@ -62,6 +62,18 @@ public class VerificationService {
                 .orElseThrow(() -> new NotFoundException("Verification not found."));
     }
 
+    /**
+     * Platform-wide review queue for admins: all verifications, or only those in the given status.
+     * Lets admins discover submitted KYC documents without already knowing an id or company.
+     */
+    @Transactional(transactionManager = "verificationTransactionManager", readOnly = true)
+    public PageResponse<VerificationResponse> listAll(VerificationStatus status, Pageable pageable) {
+        var page = status != null
+                ? verificationRepository.findByStatus(status, pageable)
+                : verificationRepository.findAll(pageable);
+        return PageResponse.from(page, VerificationResponse::from);
+    }
+
     /** Look up a verification by id alone (used by the admin decision flow). */
     @Transactional(transactionManager = "verificationTransactionManager", readOnly = true)
     public VerificationResponse getById(UUID verificationId) {

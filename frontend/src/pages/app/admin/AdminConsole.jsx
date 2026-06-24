@@ -3,17 +3,21 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ShieldCheck, BadgeCheck, Search, ScrollText, BarChart3, Check, X } from "lucide-react";
 import { useApiQuery, useApiMutation } from "@/hooks/useApi";
 import { getMetrics, listSanctions, screenSanctions, listAdminActions, approveKyc, rejectKyc } from "@/api/admin";
-import { getVerificationFlat } from "@/api/verification";
-import { formatDateTime } from "@/lib/format";
+import { listAllVerifications } from "@/api/verification";
+import { listCompanies } from "@/api/identity";
+import { VERIFICATION_TYPE_LABELS } from "@/data/enums";
+import { formatDateTime, formatDate } from "@/lib/format";
 import { PageHeader } from "@/components/common/PageHeader";
 import { DataTable } from "@/components/common/DataTable";
+import { Pagination } from "@/components/common/Pagination";
 import { LoadingState } from "@/components/common/LoadingState";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { FormField } from "@/components/common/FormField";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input, Select } from "@/components/ui/input";
+import { Dialog } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -84,89 +88,144 @@ function MetricsTab() {
 /* ---------------- KYC review ---------------- */
 
 function KycTab() {
-  const qc = useQueryClient();
-  const [idInput, setIdInput] = useState("");
-  const [lookupId, setLookupId] = useState(null);
-  const [note, setNote] = useState("");
+  const [page, setPage] = useState(0);
+  const [status, setStatus] = useState("PENDING");
+  const [reviewing, setReviewing] = useState(null);
 
-  const query = useApiQuery(["verification", lookupId], () => getVerificationFlat(lookupId), {
-    enabled: Boolean(lookupId),
-    retry: false,
-  });
-  const v = query.data;
+  const params = { page, size: 10, sort: "createdAt,desc" };
+  if (status) params.status = status;
 
-  const onDecision = {
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["verification", lookupId] });
-      qc.invalidateQueries({ queryKey: ["admin-metrics"] });
+  const query = useApiQuery(["verifications", status, page], () => listAllVerifications(params));
+  const companiesQuery = useApiQuery(["companies", "all"], () => listCompanies({ size: 200 }));
+  const companyName = (id) =>
+    (companiesQuery.data?.items || []).find((c) => c.id === id)?.name || id?.slice(0, 8);
+
+  const data = query.data;
+
+  const columns = [
+    { key: "company", header: "Company", render: (v) => <span className="font-medium">{companyName(v.companyId)}</span> },
+    { key: "type", header: "Type", render: (v) => <Badge variant="outline">{VERIFICATION_TYPE_LABELS[v.type] || v.type}</Badge> },
+    {
+      key: "fileUrl",
+      header: "Document",
+      render: (v) =>
+        v.fileUrl ? (
+          <a href={v.fileUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}
+             className="text-sm text-primary hover:underline">View</a>
+        ) : "—",
     },
-  };
-  const approve = useApiMutation(() => approveKyc(lookupId, note), { successMessage: "KYC approved", ...onDecision });
-  const reject = useApiMutation(() => rejectKyc(lookupId, note), { successMessage: "KYC rejected", ...onDecision });
+    { key: "status", header: "Status", render: (v) => <StatusBadge status={v.status} /> },
+    { key: "createdAt", header: "Submitted", render: (v) => formatDate(v.createdAt) },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      render: (v) => (
+        <Button variant={v.status === "PENDING" ? "accent" : "outline"} size="sm" onClick={() => setReviewing(v)}>
+          {v.status === "PENDING" ? "Review" : "View"}
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-wrap items-end gap-3">
-            <FormField label="Verification ID" className="flex-1 min-w-64">
-              <Input
-                placeholder="Paste a KYC submission's verification ID"
-                value={idInput}
-                onChange={(e) => setIdInput(e.target.value)}
-              />
-            </FormField>
-            <Button variant="outline" onClick={() => setLookupId(idInput.trim() || null)} disabled={!idInput.trim()}>
-              <Search /> Look up
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-center gap-2">
+        <Select className="h-9 w-auto" value={status} onChange={(e) => { setStatus(e.target.value); setPage(0); }}>
+          <option value="PENDING">Pending review</option>
+          <option value="APPROVED">Approved</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="">All</option>
+        </Select>
+      </div>
+      <DataTable
+        columns={columns}
+        rows={data?.items}
+        isLoading={query.isLoading}
+        error={query.error}
+        onRetry={query.refetch}
+        rowKey="id"
+        onRowClick={(v) => setReviewing(v)}
+        empty={{
+          icon: BadgeCheck,
+          title: status === "PENDING" ? "Nothing awaiting review" : "No verifications",
+          description: "Submitted KYC documents appear here for review.",
+        }}
+      />
+      <Pagination page={page} totalPages={data?.totalPages} onChange={setPage} />
 
-      {query.isLoading && <LoadingState />}
-      {query.error && <p className="text-sm text-destructive">No verification found for that ID.</p>}
-      {v && (
-        <Card>
-          <CardContent className="space-y-4 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{v.type}</Badge>
-                <StatusBadge status={v.status} />
-              </div>
-              {v.fileUrl && (
-                <a href={v.fileUrl} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline">
-                  View document
-                </a>
-              )}
-            </div>
-            <dl className="grid gap-3 sm:grid-cols-2 text-sm">
-              <div><dt className="text-muted-foreground">Company</dt><dd className="font-mono text-xs">{v.companyId}</dd></div>
-              <div><dt className="text-muted-foreground">Submitted</dt><dd>{formatDateTime(v.createdAt)}</dd></div>
-              {v.reviewerNote && <div className="sm:col-span-2"><dt className="text-muted-foreground">Reviewer note</dt><dd>{v.reviewerNote}</dd></div>}
-            </dl>
-            {v.status === "PENDING" ? (
-              <div className="space-y-3 border-t border-border pt-4">
-                <FormField label="Reviewer note">
-                  <Input placeholder="Optional" value={note} onChange={(e) => setNote(e.target.value)} />
-                </FormField>
-                <div className="flex gap-2">
-                  <Button variant="accent" onClick={() => approve.mutate()} disabled={approve.isPending}>
-                    <Check /> Approve
-                  </Button>
-                  <Button variant="outline" onClick={() => reject.mutate()} disabled={reject.isPending}>
-                    <X /> Reject
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <p className="border-t border-border pt-4 text-sm text-muted-foreground">
-                This verification has already been decided.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+      {reviewing && (
+        <KycReviewDialog
+          verification={reviewing}
+          companyName={companyName(reviewing.companyId)}
+          onClose={() => setReviewing(null)}
+          onDecided={() => { query.refetch(); setReviewing(null); }}
+        />
       )}
     </div>
+  );
+}
+
+function KycReviewDialog({ verification: v, companyName, onClose, onDecided }) {
+  const qc = useQueryClient();
+  const [note, setNote] = useState("");
+  const onDecision = {
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["verifications"] });
+      qc.invalidateQueries({ queryKey: ["admin-metrics"] });
+      onDecided();
+    },
+  };
+  const approve = useApiMutation(() => approveKyc(v.id, note), { successMessage: "KYC approved", ...onDecision });
+  const reject = useApiMutation(() => rejectKyc(v.id, note), { successMessage: "KYC rejected", ...onDecision });
+  const pending = v.status === "PENDING";
+
+  return (
+    <Dialog
+      open
+      onClose={onClose}
+      title={`KYC — ${companyName}`}
+      description={VERIFICATION_TYPE_LABELS[v.type] || v.type}
+      footer={
+        pending ? (
+          <>
+            <Button variant="outline" onClick={() => reject.mutate()} disabled={reject.isPending}>
+              <X /> Reject
+            </Button>
+            <Button variant="accent" onClick={() => approve.mutate()} disabled={approve.isPending}>
+              <Check /> Approve
+            </Button>
+          </>
+        ) : (
+          <Button variant="outline" onClick={onClose}>Close</Button>
+        )
+      }
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <StatusBadge status={v.status} />
+          {v.fileUrl ? (
+            <a href={v.fileUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">
+              View document ↗
+            </a>
+          ) : (
+            <span className="text-sm text-muted-foreground">No document URL</span>
+          )}
+        </div>
+        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          <div><dt className="text-muted-foreground">Company</dt><dd className="font-medium">{companyName}</dd></div>
+          <div><dt className="text-muted-foreground">Submitted</dt><dd>{formatDateTime(v.createdAt)}</dd></div>
+          {v.reviewerNote && (
+            <div className="sm:col-span-2"><dt className="text-muted-foreground">Reviewer note</dt><dd>{v.reviewerNote}</dd></div>
+          )}
+        </dl>
+        {pending && (
+          <FormField label="Reviewer note (optional)">
+            <Input placeholder="Reason / remarks" value={note} onChange={(e) => setNote(e.target.value)} />
+          </FormField>
+        )}
+      </div>
+    </Dialog>
   );
 }
 

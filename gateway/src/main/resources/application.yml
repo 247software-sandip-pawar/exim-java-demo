@@ -11,7 +11,7 @@ spring:
             - id: verification
               uri: ${VERIFICATION_URI:http://localhost:8082}
               predicates:
-                - Path=/api/v1/companies/*/verifications,/api/v1/companies/*/verifications/**,/api/v1/verifications/**
+                - Path=/api/v1/companies/*/verifications,/api/v1/companies/*/verifications/**,/api/v1/verifications,/api/v1/verifications/**
 
             # Identity: auth, users, companies, platform staff.
             - id: identity
