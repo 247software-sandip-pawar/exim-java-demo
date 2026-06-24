@@ -33,5 +33,9 @@ public class SecurityUser implements UserDetails {
     @Override public boolean isAccountNonExpired() { return true; }
     @Override public boolean isAccountNonLocked() { return true; }
     @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
+
+    /** Disabled if the user is deactivated or their company is suspended. */
+    @Override public boolean isEnabled() {
+        return user.isActive() && (user.getCompany() == null || user.getCompany().isActive());
+    }
 }

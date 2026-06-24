@@ -19,6 +19,9 @@ public class User extends BaseEntity {
 
     private Role role;
 
+    /** Whether the account may sign in. Deactivated accounts are rejected at login. */
+    private boolean active = true;
+
     /**
      * Reference to the user's company (stored as a DBRef to the {@code companies} collection, the
      * single source of truth). Resolved eagerly on load, so {@code getCompany().getName()} works in
@@ -38,6 +41,8 @@ public class User extends BaseEntity {
     public void setPhone(String phone) { this.phone = phone; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
     public Company getCompany() { return company; }
     public void setCompany(Company company) { this.company = company; }
 }

@@ -14,6 +14,7 @@ public class CompanyResponse {
     private String iecCode;
     private String gstin;
     private boolean verified;
+    private boolean active;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -26,6 +27,7 @@ public class CompanyResponse {
         r.iecCode = company.getIecCode();
         r.gstin = company.getGstin();
         r.verified = company.isVerified();
+        r.active = company.isActive();
         r.createdAt = company.getCreatedAt();
         r.updatedAt = company.getUpdatedAt();
         return r;
@@ -38,6 +40,7 @@ public class CompanyResponse {
     public String getIecCode() { return iecCode; }
     public String getGstin() { return gstin; }
     public boolean isVerified() { return verified; }
+    public boolean isActive() { return active; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

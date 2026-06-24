@@ -67,6 +67,15 @@ public class CompanyService {
         return CompanyResponse.from(company);
     }
 
+    /** Suspends or reinstates a company. Suspending blocks its members at login. */
+    @Transactional
+    public CompanyResponse setActive(UUID id, boolean active) {
+        Company company = findOrThrow(id);
+        company.setActive(active);
+        companyRepository.save(company);
+        return CompanyResponse.from(company);
+    }
+
     @Transactional
     public void delete(UUID id) {
         Company company = findOrThrow(id);

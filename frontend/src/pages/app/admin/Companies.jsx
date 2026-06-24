@@ -3,13 +3,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Ban, CheckCircle2 } from "lucide-react";
 import { useApiQuery, useApiMutation } from "@/hooks/useApi";
 import {
   listCompanies,
   createCompany,
   updateCompany,
   deleteCompany,
+  setCompanyActive,
 } from "@/api/identity";
 import { COMPANY_TYPES, labelize } from "@/data/enums";
 import { PageHeader } from "@/components/common/PageHeader";
@@ -45,19 +46,33 @@ export default function Companies() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["companies"] });
   const data = query.data;
 
+  const toggleActive = useApiMutation(({ id, active }) => setCompanyActive(id, active), {
+    successMessage: "Company updated",
+    onSuccess: invalidate,
+  });
+
   const columns = [
     { key: "name", header: "Company", render: (c) => <span className="font-medium">{c.name}</span> },
     { key: "type", header: "Type", render: (c) => <Badge variant="outline">{labelize(c.type)}</Badge> },
     { key: "country", header: "Country" },
-    { key: "iecCode", header: "IEC", render: (c) => c.iecCode || "—" },
-    { key: "gstin", header: "GSTIN", render: (c) => c.gstin || "—" },
-    { key: "verified", header: "Status", render: (c) => <StatusBadge status={c.verified ? "VERIFIED" : "PENDING"} /> },
+    { key: "verified", header: "KYC", render: (c) => <StatusBadge status={c.verified ? "VERIFIED" : "PENDING"} /> },
+    { key: "active", header: "Status", render: (c) => <StatusBadge status={c.active ? "ACTIVE" : "SUSPENDED"} /> },
     {
       key: "actions",
       header: "",
       align: "right",
       render: (c) => (
         <div className="flex justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={toggleActive.isPending}
+            onClick={() => toggleActive.mutate({ id: c.id, active: !c.active })}
+            aria-label={c.active ? "Suspend" : "Reinstate"}
+            title={c.active ? "Suspend" : "Reinstate"}
+          >
+            {c.active ? <Ban className="text-destructive" /> : <CheckCircle2 className="text-teal-600" />}
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => setEditing(c)} aria-label="Edit">
             <Pencil />
           </Button>

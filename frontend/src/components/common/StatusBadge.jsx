@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
  */
 const POSITIVE = ["APPROVED", "ACTIVE", "ACCEPTED", "PAID", "RELEASED", "FUNDED", "DELIVERED", "RESOLVED", "COMPLETED", "VERIFIED"];
 const WARNING = ["PENDING", "SUBMITTED", "IN_REVIEW", "INITIATED", "IN_TRANSIT", "OPEN", "COUNTERED", "PROCESSING"];
-const NEGATIVE = ["REJECTED", "CANCELLED", "CANCELED", "REFUNDED", "FAILED", "DISPUTED", "EXPIRED", "CLOSED"];
+const NEGATIVE = ["REJECTED", "CANCELLED", "CANCELED", "REFUNDED", "FAILED", "DISPUTED", "EXPIRED", "CLOSED", "SUSPENDED", "DISABLED"];
 
 export function StatusBadge({ status }) {
   if (!status) return null;

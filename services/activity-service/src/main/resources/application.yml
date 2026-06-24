@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: activity-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  mongodb:
+    uri: ${MONGODB_URI:mongodb://localhost:27017/?directConnection=true}
+    database: ${ACTIVITY_DB_NAME:exim_activity}
+    representation:
+      uuid: standard
+  data:
+    mongodb:
+      auto-index-creation: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-to-a-long-random-secret-of-at-least-32-bytes-please}
+
+management:
+  health:
+    mongo:
+      enabled: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: 8095

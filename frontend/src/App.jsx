@@ -2,8 +2,9 @@ import { useEffect } from "react";
 import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { ProtectedRoute, RoleRoute } from "@/auth/RouteGuards";
+import { ProtectedRoute, RoleRoute, AdminRoute } from "@/auth/RouteGuards";
 import { AppShell } from "@/components/app/AppShell";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { navItems } from "@/config/nav";
 
 import Home from "@/pages/Home";
@@ -38,6 +39,9 @@ import Billing from "@/pages/app/billing/Billing";
 import Ratings from "@/pages/app/trust/Ratings";
 import Disputes from "@/pages/app/trust/Disputes";
 import AdminConsole from "@/pages/app/admin/AdminConsole";
+import AdminLogin from "@/pages/admin/AdminLogin";
+import AdminStaff from "@/pages/admin/Staff";
+import AdminActivity from "@/pages/admin/Activity";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -80,6 +84,18 @@ export default function App() {
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Platform admin portal — separate login + shell from the company app */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminShell />}>
+            <Route index element={<AdminConsole />} />
+            <Route path="staff" element={<AdminStaff />} />
+            <Route path="companies" element={<Companies />} />
+            <Route path="users" element={<Users />} />
+            <Route path="activity" element={<AdminActivity />} />
+          </Route>
+        </Route>
 
         {/* Authenticated app */}
         <Route element={<ProtectedRoute />}>

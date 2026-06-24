@@ -11,6 +11,7 @@ public class UserResponse {
     private String email;
     private String phone;
     private String role;
+    private boolean active;
     private UUID companyId;
     private String companyName;
 
@@ -21,6 +22,7 @@ public class UserResponse {
         r.email = user.getEmail();
         r.phone = user.getPhone();
         r.role = user.getRole().name();
+        r.active = user.isActive();
         if (user.getCompany() != null) {
             r.companyId = user.getCompany().getId();
             r.companyName = user.getCompany().getName();
@@ -33,6 +35,7 @@ public class UserResponse {
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
     public String getRole() { return role; }
+    public boolean isActive() { return active; }
     public UUID getCompanyId() { return companyId; }
     public String getCompanyName() { return companyName; }
 }

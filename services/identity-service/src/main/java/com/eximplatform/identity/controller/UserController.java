@@ -3,6 +3,7 @@ package com.eximplatform.identity.controller;
 import com.eximplatform.common.api.ApiResponse;
 import com.eximplatform.common.api.PageResponse;
 import com.eximplatform.identity.dto.CreateUserRequest;
+import com.eximplatform.identity.dto.SetActiveRequest;
 import com.eximplatform.identity.dto.UpdateUserRequest;
 import com.eximplatform.identity.dto.UserResponse;
 import com.eximplatform.identity.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -70,5 +72,13 @@ public class UserController {
     @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public void delete(@PathVariable UUID id) {
         userService.delete(id);
+    }
+
+    /** Activate / deactivate a user (moderation). A deactivated user can no longer sign in. */
+    @PatchMapping("/{id}/active")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
+    public ApiResponse<UserResponse> setActive(@PathVariable UUID id,
+                                               @Valid @RequestBody SetActiveRequest request) {
+        return ApiResponse.ok(userService.setActive(id, request.getActive()));
     }
 }

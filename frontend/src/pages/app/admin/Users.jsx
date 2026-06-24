@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Users as UsersIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, Users as UsersIcon, ShieldOff, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/auth/AuthContext";
 import { useApiQuery, useApiMutation } from "@/hooks/useApi";
 import {
@@ -11,12 +11,14 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  setUserActive,
   listCompanies,
 } from "@/api/identity";
 import { ROLES, labelize } from "@/data/enums";
 import { PageHeader } from "@/components/common/PageHeader";
 import { DataTable } from "@/components/common/DataTable";
 import { Pagination } from "@/components/common/Pagination";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import { FormField } from "@/components/common/FormField";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,12 +58,17 @@ export default function Users() {
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["users"] });
 
+  const toggleActive = useApiMutation(({ id, active }) => setUserActive(id, active), {
+    successMessage: "User updated",
+    onSuccess: invalidate,
+  });
+
   const columns = [
     { key: "name", header: "Name", render: (u) => <span className="font-medium">{u.name}</span> },
     { key: "email", header: "Email" },
     { key: "role", header: "Role", render: (u) => <Badge variant="outline">{labelize(u.role)}</Badge> },
     { key: "companyName", header: "Company", render: (u) => u.companyName || "—" },
-    { key: "phone", header: "Phone", render: (u) => u.phone || "—" },
+    { key: "active", header: "Status", render: (u) => <StatusBadge status={u.active ? "ACTIVE" : "DISABLED"} /> },
     ...(canManage
       ? [
           {
@@ -70,6 +77,16 @@ export default function Users() {
             align: "right",
             render: (u) => (
               <div className="flex justify-end gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={toggleActive.isPending}
+                  onClick={() => toggleActive.mutate({ id: u.id, active: !u.active })}
+                  aria-label={u.active ? "Deactivate" : "Activate"}
+                  title={u.active ? "Deactivate" : "Activate"}
+                >
+                  {u.active ? <ShieldOff className="text-destructive" /> : <ShieldCheck className="text-teal-600" />}
+                </Button>
                 <Button variant="ghost" size="icon" onClick={() => setEditing(u)} aria-label="Edit">
                   <Pencil />
                 </Button>

@@ -23,6 +23,16 @@ app:
     access-token-expiration-ms: 900000   # 15 minutes
   security:
     public-paths: /api/v1/auth/**
+  # Seeds a PLATFORM_ADMIN on startup if one with this email doesn't exist (idempotent).
+  # Override the password in any real environment via PLATFORM_ADMIN_PASSWORD.
+  platform-admin:
+    enabled: ${PLATFORM_ADMIN_ENABLED:true}
+    email: ${PLATFORM_ADMIN_EMAIL:admin@hirkaniexim.com}
+    password: ${PLATFORM_ADMIN_PASSWORD:Admin@12345}
+    name: ${PLATFORM_ADMIN_NAME:Platform Admin}
+  # Shared secret for the out-of-band POST /api/v1/auth/bootstrap-admin endpoint. Blank disables it.
+  admin-bootstrap:
+    secret: ${ADMIN_BOOTSTRAP_SECRET:bootstrap-me-change-in-prod}
 
 # Atlas M0 (free tier) forbids the command Spring's Mongo health check runs against the
 # 'local' db, so disable it; the app's own database access is unaffected.

@@ -68,6 +68,14 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
+  // Dedicated platform-staff sign-in (rejects company accounts server-side).
+  const adminLogin = useCallback(async (email, password) => {
+    const data = await api.post("/auth/admin-login", { email, password });
+    setToken(data.accessToken);
+    setUser(data.user);
+    return data.user;
+  }, []);
+
   const hasRole = useCallback(
     (...roles) => (user ? roles.includes(user.role) : false),
     [user]
@@ -80,6 +88,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(token),
     login,
     register,
+    adminLogin,
     logout,
     hasRole,
   };
