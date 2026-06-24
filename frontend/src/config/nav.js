@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Package,
+  Hash,
   Search,
   FileText,
   ScrollText,
@@ -30,8 +31,9 @@ export const navGroups = [
   {
     label: "Trade",
     items: [
-      { to: "/app/catalog", label: "Catalog", icon: Package, soon: true },
-      { to: "/app/sourcing", label: "Sourcing / RFQs", icon: Search, soon: true },
+      { to: "/app/catalog", label: "Catalog", icon: Package },
+      { to: "/app/hs-codes", label: "HS Codes", icon: Hash },
+      { to: "/app/sourcing", label: "Sourcing / RFQs", icon: Search },
       { to: "/app/quotes", label: "Quotes", icon: ScrollText, soon: true },
       { to: "/app/orders", label: "Orders", icon: ShoppingCart, soon: true },
       { to: "/app/messages", label: "Messages", icon: MessagesSquare, soon: true },

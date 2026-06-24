@@ -19,6 +19,11 @@ import Company from "@/pages/app/Company";
 import Verification from "@/pages/app/Verification";
 import Users from "@/pages/app/admin/Users";
 import Companies from "@/pages/app/admin/Companies";
+import Catalog from "@/pages/app/catalog/Catalog";
+import ProductDetail from "@/pages/app/catalog/ProductDetail";
+import HsCodes from "@/pages/app/catalog/HsCodes";
+import Rfqs from "@/pages/app/sourcing/Rfqs";
+import RfqDetail from "@/pages/app/sourcing/RfqDetail";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -71,6 +76,13 @@ export default function App() {
             <Route path="company" element={<Company />} />
             {/* Phase 2 — Verification / KYC */}
             <Route path="verification" element={<Verification />} />
+
+            {/* Phase 3 — Catalog & Sourcing */}
+            <Route path="catalog" element={<Catalog />} />
+            <Route path="catalog/:productId" element={<ProductDetail />} />
+            <Route path="hs-codes" element={<HsCodes />} />
+            <Route path="sourcing" element={<Rfqs />} />
+            <Route path="sourcing/:rfqId" element={<RfqDetail />} />
             <Route element={<RoleRoute roles={["PLATFORM_ADMIN", "SUPPORT"]} />}>
               <Route path="users" element={<Users />} />
             </Route>
