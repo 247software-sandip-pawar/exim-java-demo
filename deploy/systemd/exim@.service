@@ -1,0 +1,28 @@
+# Templated systemd unit — one instance per jar. The instance name (%i) is the jar's base name.
+# Install:   sudo cp deploy/systemd/exim@.service /etc/systemd/system/
+# Each jar carries its own server.port (from its application.yml), so no port is passed here.
+#
+# Enable + start every service (gateway last so its targets are up):
+#   for s in identity-service verification-service catalog-service sourcing-service \
+#            quotation-service messaging-service orders-service documents-service \
+#            logistics-service payments-service billing-service trust-service \
+#            notification-service admin-service activity-service gateway; do
+#     sudo systemctl enable --now exim@$s
+#   done
+
+[Unit]
+Description=EXIM service %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=exim
+EnvironmentFile=/opt/exim/exim.env
+# -Xmx256m keeps 16 JVMs inside ~8 GB RAM; raise for busier services if you have headroom.
+ExecStart=/usr/bin/java -Xmx256m -jar /opt/exim/jars/%i.jar
+Restart=on-failure
+RestartSec=5
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
