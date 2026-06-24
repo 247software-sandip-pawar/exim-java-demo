@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Hirkani Exim — Design Tokens
+  All semantic colors are HSL channel triplets so Tailwind can apply opacity.
+  Brand: deep ocean "navy" (trust, global trade) + saffron "gold" (value, heritage).
+*/
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 206 45% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 206 45% 12%;
+
+    --primary: 205 73% 22%; /* navy-700 #0f3f60 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 205 40% 96%;
+    --secondary-foreground: 205 73% 22%;
+
+    --muted: 210 30% 96%;
+    --muted-foreground: 206 16% 44%;
+
+    --accent: 38 91% 53%; /* gold-500 #f4a11e */
+    --accent-foreground: 206 45% 12%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 24% 90%;
+    --input: 210 24% 90%;
+    --ring: 205 73% 22%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-navy-900;
+  }
+  ::selection {
+    @apply bg-gold-400/40;
+  }
+}
+
+@layer components {
+  /* Subtle dotted-grid backdrop for hero / feature bands */
+  .bg-grid {
+    background-image: radial-gradient(
+      hsl(var(--primary) / 0.08) 1px,
+      transparent 1px
+    );
+    background-size: 22px 22px;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+}
