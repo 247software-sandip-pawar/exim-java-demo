@@ -50,9 +50,9 @@ export const navGroups = [
   {
     label: "Business",
     items: [
-      { to: "/app/billing", label: "Subscription", icon: CreditCard, soon: true },
-      { to: "/app/ratings", label: "Ratings", icon: Star, soon: true },
-      { to: "/app/disputes", label: "Disputes", icon: AlertOctagon, soon: true },
+      { to: "/app/billing", label: "Subscription", icon: CreditCard },
+      { to: "/app/ratings", label: "Ratings", icon: Star },
+      { to: "/app/disputes", label: "Disputes", icon: AlertOctagon },
     ],
   },
   {
@@ -78,7 +78,6 @@ export const navGroups = [
         label: "Admin console",
         icon: ShieldCheck,
         roles: ["PLATFORM_ADMIN"],
-        soon: true,
       },
     ],
   },

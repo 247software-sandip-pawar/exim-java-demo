@@ -95,5 +95,33 @@ export const LC_STATUS_NEXT = {
   CANCELLED: [],
 };
 
+// billing-service
+export const SUBSCRIPTION_STATUSES = ["ACTIVE", "PAST_DUE", "CANCELLED", "EXPIRED"];
+export const PLATFORM_PAYMENT_STATUSES = ["PENDING", "PAID", "FAILED", "REFUNDED"];
+
+// trust-service — dispute lifecycle.
+export const DISPUTE_STATUSES = ["OPEN", "UNDER_REVIEW", "RESOLVED", "REJECTED", "CANCELLED"];
+export const DISPUTE_STATUS_NEXT = {
+  OPEN: ["UNDER_REVIEW", "CANCELLED"],
+  UNDER_REVIEW: ["RESOLVED", "REJECTED"],
+  RESOLVED: [],
+  REJECTED: [],
+  CANCELLED: [],
+};
+
+// notification-service
+export const NOTIFICATION_TYPES = [
+  "QUOTE_RECEIVED",
+  "QUOTE_ACCEPTED",
+  "ORDER_CREATED",
+  "SHIPMENT_UPDATE",
+  "PAYMENT_RELEASED",
+  "DISPUTE_UPDATE",
+  "GENERIC",
+];
+
+// admin-service
+export const ADMIN_ACTION_TYPES = ["KYC_APPROVE", "KYC_REJECT", "SANCTION_SCREEN"];
+
 export const labelize = (v) =>
   v ? String(v).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "";

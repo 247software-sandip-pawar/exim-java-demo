@@ -34,6 +34,10 @@ import Shipments from "@/pages/app/shipments/Shipments";
 import ShipmentDetail from "@/pages/app/shipments/ShipmentDetail";
 import Payments from "@/pages/app/payments/Payments";
 import PaymentDetail from "@/pages/app/payments/PaymentDetail";
+import Billing from "@/pages/app/billing/Billing";
+import Ratings from "@/pages/app/trust/Ratings";
+import Disputes from "@/pages/app/trust/Disputes";
+import AdminConsole from "@/pages/app/admin/AdminConsole";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -107,11 +111,17 @@ export default function App() {
             <Route path="shipments/:shipmentId" element={<ShipmentDetail />} />
             <Route path="payments" element={<Payments />} />
             <Route path="payments/:paymentId" element={<PaymentDetail />} />
+
+            {/* Phase 6 — Revenue & operations */}
+            <Route path="billing" element={<Billing />} />
+            <Route path="ratings" element={<Ratings />} />
+            <Route path="disputes" element={<Disputes />} />
             <Route element={<RoleRoute roles={["PLATFORM_ADMIN", "SUPPORT"]} />}>
               <Route path="users" element={<Users />} />
             </Route>
             <Route element={<RoleRoute roles={["PLATFORM_ADMIN"]} />}>
               <Route path="companies" element={<Companies />} />
+              <Route path="admin" element={<AdminConsole />} />
             </Route>
 
             {soonRoutes.map((r) => (
