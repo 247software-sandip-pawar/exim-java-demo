@@ -57,18 +57,37 @@ through `https://hirkaniexim.com`.
 
 ## 3. Point the domain at the server (DNS)
 
-In your domain registrar's DNS panel, create two **A records** pointing at your server's public IP:
+You need two records pointing at your server's public IP:
 
-| Type | Name | Value |
-|------|------|-------|
-| A | `@`   | `YOUR.SERVER.IP` |
-| A | `www` | `YOUR.SERVER.IP` |
+| Type | Name (Host) | Value | TTL |
+|------|------|-------|-----|
+| A     | `@`   | `YOUR.SERVER.IP` | 600 |
+| CNAME | `www` | `hirkaniexim.com` | 1 hour |
 
-DNS can take 5 minutes to a few hours. Verify from your laptop:
+(An `A www → YOUR.SERVER.IP` record works too — either is fine.)
+
+### Doing it in GoDaddy (your registrar)
+
+The registrar doesn't change anything in this project — only *where you click* to set DNS.
+
+1. Sign in to GoDaddy → top-right menu → **Domain Portfolio** (or "My Products").
+2. Find `hirkaniexim.com` → the **⋮ / DNS** button → **Manage DNS**.
+3. GoDaddy pre-creates a **parked** `A` record on `@` and a `CNAME www → @`. **Edit the
+   existing `A @` record — don't add a second one:** set its **Value** to `YOUR.SERVER.IP`,
+   **Save**. Optionally lower **TTL** to 600 seconds for faster propagation.
+4. Leave (or recreate) the `CNAME` `www → @` so `www.hirkaniexim.com` follows the apex.
+5. **Do NOT use GoDaddy "Domain Forwarding"** and don't point the domain at a GoDaddy
+   "Website Builder"/parking product — those override your A record. Plain DNS A/CNAME only.
+6. Keep GoDaddy's **default nameservers** (managing DNS here is simplest). Only change
+   nameservers if you deliberately move DNS to another provider (e.g. Cloudflare).
+7. MX/email records are unaffected — leave them as-is.
+
+DNS can take 5 minutes to a few hours to propagate. Verify from your laptop:
 ```bash
-dig +short hirkaniexim.com      # should print YOUR.SERVER.IP
+dig +short hirkaniexim.com        # should print YOUR.SERVER.IP
+dig +short www.hirkaniexim.com    # should resolve to the same IP
 ```
-Do not continue to TLS (§8) until this resolves.
+Do not continue to TLS (§9) until both resolve — Let's Encrypt validates over the live domain.
 
 ---
 
