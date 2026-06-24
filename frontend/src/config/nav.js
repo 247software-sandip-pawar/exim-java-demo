@@ -43,8 +43,8 @@ export const navGroups = [
   {
     label: "Execution",
     items: [
-      { to: "/app/shipments", label: "Shipments", icon: Ship, soon: true },
-      { to: "/app/payments", label: "Payments", icon: Wallet, soon: true },
+      { to: "/app/shipments", label: "Shipments", icon: Ship },
+      { to: "/app/payments", label: "Payments", icon: Wallet },
     ],
   },
   {

@@ -60,5 +60,40 @@ export const DOCUMENT_TYPE_LABELS = {
 // Standard Incoterms 2020 (used in quotes / in-chat offers).
 export const INCOTERMS = ["EXW", "FCA", "FAS", "FOB", "CFR", "CIF", "CPT", "CIP", "DAP", "DPU", "DDP"];
 
+// logistics-service
+export const TRANSPORT_MODES = ["SEA", "AIR", "ROAD", "RAIL", "MULTIMODAL"];
+export const SHIPMENT_STATUSES = ["CREATED", "BOOKED", "IN_TRANSIT", "ARRIVED", "DELIVERED", "CANCELLED"];
+// Allowed next statuses for a tracking event (mirrors ShipmentStatus.allowedNext()).
+export const SHIPMENT_STATUS_NEXT = {
+  CREATED: ["BOOKED", "CANCELLED"],
+  BOOKED: ["IN_TRANSIT", "CANCELLED"],
+  IN_TRANSIT: ["ARRIVED", "CANCELLED"],
+  ARRIVED: ["DELIVERED"],
+  DELIVERED: [],
+  CANCELLED: [],
+};
+
+// payments-service — escrow transaction lifecycle.
+export const PAYMENT_METHODS = ["ESCROW", "LETTER_OF_CREDIT", "WIRE", "NET_TERMS"];
+export const TRANSACTION_STATUSES = ["INITIATED", "FUNDED", "RELEASED", "REFUNDED", "FAILED"];
+export const TRANSACTION_STATUS_NEXT = {
+  INITIATED: ["FUNDED", "FAILED"],
+  FUNDED: ["RELEASED", "REFUNDED"],
+  RELEASED: [],
+  REFUNDED: [],
+  FAILED: [],
+};
+
+// payments-service — letter of credit lifecycle.
+export const LC_STATUSES = ["DRAFT", "ISSUED", "CONFIRMED", "SETTLED", "EXPIRED", "CANCELLED"];
+export const LC_STATUS_NEXT = {
+  DRAFT: ["ISSUED", "CANCELLED"],
+  ISSUED: ["CONFIRMED", "SETTLED", "EXPIRED", "CANCELLED"],
+  CONFIRMED: ["SETTLED", "EXPIRED"],
+  SETTLED: [],
+  EXPIRED: [],
+  CANCELLED: [],
+};
+
 export const labelize = (v) =>
   v ? String(v).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "";

@@ -30,6 +30,10 @@ import Orders from "@/pages/app/orders/Orders";
 import OrderDetail from "@/pages/app/orders/OrderDetail";
 import Messages from "@/pages/app/messages/Messages";
 import Documents from "@/pages/app/documents/Documents";
+import Shipments from "@/pages/app/shipments/Shipments";
+import ShipmentDetail from "@/pages/app/shipments/ShipmentDetail";
+import Payments from "@/pages/app/payments/Payments";
+import PaymentDetail from "@/pages/app/payments/PaymentDetail";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -97,6 +101,12 @@ export default function App() {
             <Route path="orders/:orderId" element={<OrderDetail />} />
             <Route path="messages" element={<Messages />} />
             <Route path="documents" element={<Documents />} />
+
+            {/* Phase 5 — Execution */}
+            <Route path="shipments" element={<Shipments />} />
+            <Route path="shipments/:shipmentId" element={<ShipmentDetail />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="payments/:paymentId" element={<PaymentDetail />} />
             <Route element={<RoleRoute roles={["PLATFORM_ADMIN", "SUPPORT"]} />}>
               <Route path="users" element={<Users />} />
             </Route>
