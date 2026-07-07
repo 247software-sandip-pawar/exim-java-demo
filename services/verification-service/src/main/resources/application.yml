@@ -27,7 +27,7 @@ app:
 # 'local' db, so disable it; the app's own database access is unaffected.
 management:
   health:
-    mongo:
+    mongodb:
       enabled: false
 
 springdoc:

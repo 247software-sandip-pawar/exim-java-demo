@@ -18,7 +18,7 @@ app:
 
 management:
   health:
-    mongo:
+    mongodb:
       enabled: false
 
 springdoc:

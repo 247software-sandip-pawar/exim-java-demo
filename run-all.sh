@@ -32,6 +32,7 @@ SERVICES=(
   "trust-service:8092"
   "notification-service:8093"
   "admin-service:8094"
+  "activity-service:8095"
 )
 
 start() {  # start <jar> <name> <port>
