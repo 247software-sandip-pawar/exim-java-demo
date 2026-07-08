@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreKit
 import DomainKit
 import DesignSystemKit
 import SessionKit
@@ -7,6 +8,9 @@ import SessionKit
 public struct AuthLandingView: View {
     private let repository: AuthRepository
     private let session: SessionStore
+
+    @State private var showingServerSettings = false
+    @State private var serverHost = AppConfig.baseURLString
 
     public init(repository: AuthRepository, session: SessionStore) {
         self.repository = repository
@@ -37,11 +41,35 @@ public struct AuthLandingView: View {
                         }
                         .padding(Theme.padding)
                         .glassCard()
+
+                        Button {
+                            showingServerSettings = true
+                        } label: {
+                            Label(serverHost, systemImage: "server.rack")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.secondary)
+                                .glassChip()
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(24)
                     .frame(maxWidth: 480)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 60)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showingServerSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingServerSettings) {
+                ServerSettingsView {
+                    serverHost = AppConfig.baseURLString
                 }
             }
         }

@@ -35,7 +35,7 @@ let package = Package(
         .target(name: "SessionKit", dependencies: ["DomainKit", "NetworkingKit"]),
 
         // MARK: Features
-        .target(name: "AuthFeature", dependencies: ["DomainKit", "SessionKit", "DesignSystemKit"]),
+        .target(name: "AuthFeature", dependencies: ["CoreKit", "DomainKit", "SessionKit", "DesignSystemKit"]),
         .target(name: "HomeFeature", dependencies: ["DomainKit", "SessionKit", "DesignSystemKit"]),
         .target(name: "CatalogFeature", dependencies: ["DomainKit", "SessionKit", "DesignSystemKit"]),
         .target(name: "QuotationFeature", dependencies: ["DomainKit", "SessionKit", "DesignSystemKit"]),
