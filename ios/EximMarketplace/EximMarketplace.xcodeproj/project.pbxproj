@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,7 +15,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		1A10000000000000000000C1 /* Exceptions for "EximMarketplace" folder in "EximMarketplace" target */ = {
+		1A10000000000000000000C1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -25,18 +25,7 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1A10000000000000000000C2 /* EximMarketplace */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				1A10000000000000000000C1 /* Exceptions for "EximMarketplace" folder in "EximMarketplace" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = EximMarketplace;
-			sourceTree = "<group>";
-		};
+		1A10000000000000000000C2 /* EximMarketplace */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (1A10000000000000000000C1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = EximMarketplace; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,7 +110,6 @@
 			packageReferences = (
 				1A1000000000000000000110 /* XCLocalSwiftPackageReference "Packages/EximKit" */,
 			);
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A10000000000000000000F2 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -214,7 +202,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = EFF562SLKT;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EximMarketplace/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -243,7 +231,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = EFF562SLKT;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = EximMarketplace/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
