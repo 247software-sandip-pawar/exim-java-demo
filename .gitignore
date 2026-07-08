@@ -16,3 +16,10 @@ HELP.md
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+
+# iOS / Xcode
+ios/**/xcuserdata/
+ios/**/*.xcuserstate
+ios/**/DerivedData/
+ios/**/.build/
+ios/**/.swiftpm/
